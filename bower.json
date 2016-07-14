@@ -1,0 +1,25 @@
+{
+  "name": "totvs-twebchannel",
+  "description": "",
+  "main": "src/js/totvs-twebchannel.js",
+  "keywords": [
+    "totvs",
+    "websocket",
+    "webchannel"
+  ],
+  "authors": [
+    "Rogerio Ribeiro da Cruz",
+    "Ricardo Mansano Godoi"
+  ],
+  "license": "MIT",
+  "homepage": "www.totvs.com",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+	"target"
+  ]
+}
