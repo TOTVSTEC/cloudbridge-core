@@ -92,18 +92,16 @@ module.exports = function(grunt) {
 	// Default task.
 	grunt.registerTask('default', ['clean', 'dist']);
 
-	grunt.registerTask('release', ['clean', 'dist', 'bowerRelease']);
-
 	grunt.registerTask('release', 'Build and release a new version', function(target) {
 		var semver = require('semver'),
 			packageJson = grunt.file.readJSON('package.json'),
 			bowerJson = grunt.file.readJSON('bower.json');
 
 		packageJson.version = semver.inc(packageJson.version, 'patch');
-		grunt.file.write('package.json', JSON.stringify(packageJson, null, 2));
+		grunt.file.write('package.json', JSON.stringify(packageJson, null, 2) + '\n');
 
 		bowerJson.version = 'v' + packageJson.version;
-		grunt.file.write('bower.json', JSON.stringify(bowerJson, null, 2));
+		grunt.file.write('bower.json', JSON.stringify(bowerJson, null, 2) + '\n');
 
 		grunt.task.run(['clean', 'dist', 'bowerRelease']);
 	});
