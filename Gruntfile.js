@@ -66,7 +66,7 @@ module.exports = function(grunt) {
 			stable: {
 				options: {
 					endpoint: 'https://github.com/TOTVSTEC/bower-totvs-twebchannel.git',
-					packageName: 'bower-<%= pkg.name %>',
+					packageName: '<%= pkg.name %>',
 					stageDir: 'build/release'
 				},
 				files: [
