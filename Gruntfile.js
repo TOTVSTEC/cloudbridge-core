@@ -1,7 +1,6 @@
 'use strict';
 
 module.exports = function(grunt) {
-
 	var pkg = grunt.file.readJSON('package.json');
 
 	grunt.initConfig({
@@ -62,16 +61,13 @@ module.exports = function(grunt) {
 
 		bowerRelease: {
 			options: {
-				main: '<%= pkg.name %>.min.js',
-				dependencies: {
-
-				}
+				main: '<%= pkg.name %>.min.js'
 			},
 			stable: {
 				options: {
-					endpoint: 'git://github.com/TOTVSTEC/bower-totvs-twebchannel.git',
-					packageName: '<%= pkg.name %>',
-					stageDir: 'build/dist'
+					endpoint: 'https://github.com/TOTVSTEC/bower-totvs-twebchannel.git',
+					packageName: 'bower-<%= pkg.name %>',
+					stageDir: 'build/release'
 				},
 				files: [
 					{
@@ -97,5 +93,19 @@ module.exports = function(grunt) {
 	grunt.registerTask('default', ['clean', 'dist']);
 
 	grunt.registerTask('release', ['clean', 'dist', 'bowerRelease']);
+
+	grunt.registerTask('release', 'Build and release a new version', function(target) {
+		var semver = require('semver'),
+			packageJson = grunt.file.readJSON('package.json'),
+			bowerJson = grunt.file.readJSON('bower.json');
+
+		packageJson.version = semver.inc(packageJson.version, 'patch');
+		grunt.file.write('package.json', JSON.stringify(packageJson, null, 2));
+
+		bowerJson.version = 'v' + packageJson.version;
+		grunt.file.write('bower.json', JSON.stringify(bowerJson, null, 2));
+
+		grunt.task.run(['clean', 'dist', 'bowerRelease']);
+	});
 
 };

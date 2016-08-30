@@ -1,7 +1,7 @@
 {
   "name": "totvs-twebchannel",
   "version": "0.0.2",
-  "description": "",
+  "description": "A JavaScript TWebChannel for TOTVS Platform",
   "main": "Gruntfile.js",
   "contributors": [
     {
@@ -16,13 +16,14 @@
   "license": "MIT",
   "devDependencies": {
     "grunt": "^1.0.1",
-    "grunt-bower-release": "0.0.5",
+    "grunt-bower-release": "^0.0.5",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-template": "^1.0.0",
     "grunt-ts": "^5.5.1",
     "load-grunt-tasks": "^3.5.2",
+    "semver": "^5.3.0",
     "time-grunt": "^1.2.1"
   }
 }
