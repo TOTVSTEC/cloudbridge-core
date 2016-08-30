@@ -1,20 +1,20 @@
+'use strict';
+
 module.exports = function(grunt) {
-	'use strict';
 
-	grunt.loadNpmTasks('grunt-typescript');
+	var pkg = grunt.file.readJSON('package.json');
 
-	// Project configuration.
 	grunt.initConfig({
 
-		pkg: grunt.file.readJSON('package.json'),
+		pkg: pkg,
 
 		// Task configuration.
 		clean: {
-			dist: ['build', 'dist']
+			dist: ['build']
 		},
 
-		typescript: {
-			base: {
+		ts: {
+			dist: {
 				src: ['src/ts/**/*.ts'],
 				dest: 'build/stagging/ts',
 				options: {
@@ -24,13 +24,26 @@ module.exports = function(grunt) {
 			}
 		},
 
+		template: {
+			js: {
+				options: {
+					data: {
+						package: pkg
+					}
+				},
+				files: {
+					'build/stagging/js/<%= pkg.name %>.js': ['<%= ts.dist.dest %>/<%= pkg.name %>.js']
+				}
+			}
+		},
+
 		concat: {
 			dist: {
 				src: [
 					'src/js/qwebchannel-5.7.0.js',
-					'build/stagging/ts/totvs-twebchannel.js'
+					'build/stagging/js/<%= pkg.name %>.js'
 				],
-				dest: 'build/stagging/js/<%= pkg.name %>.concat.js'
+				dest: 'build/dist/<%= pkg.name %>.js'
 			}
 		},
 
@@ -39,33 +52,32 @@ module.exports = function(grunt) {
 				compress: {
 					warnings: false
 				},
-				mangle: true,
+				mangle: true
 			},
-			core: {
+			dist: {
 				src: '<%= concat.dist.dest %>',
-				dest: 'dist/js/<%= pkg.name %>.min.js'
+				dest: 'build/dist/<%= pkg.name %>.min.js'
 			}
 		},
 
-		exec: {
-			npmUpdate: {
-				command: 'npm update'
-			}
-		},
+		bowerRelease: {
+			options: {
+				main: '<%= pkg.name %>.min.js',
+				dependencies: {
 
-		compress: {
-			main: {
+				}
+			},
+			stable: {
 				options: {
-					archive: 'build/<%= pkg.name %>-<%= pkg.version %>.zip',
-					mode: 'zip',
-					level: 9,
-					pretty: true
+					endpoint: 'git://github.com/TOTVSTEC/bower-totvs-twebchannel.git',
+					packageName: '<%= pkg.name %>',
+					stageDir: 'build/dist'
 				},
 				files: [
 					{
 						expand: true,
-						cwd: 'dist/',
-						src: ['**']
+						cwd: 'build/dist/',
+						src: ['<%= pkg.name %>.js', '<%= pkg.name %>.min.js']
 					}
 				]
 			}
@@ -78,13 +90,12 @@ module.exports = function(grunt) {
 	require('load-grunt-tasks')(grunt, { scope: 'devDependencies' });
 	require('time-grunt')(grunt);
 
-	// JS distribution task.
-	grunt.registerTask('dist-js', ['concat', 'uglify:core']);
-
 	// Full distribution task.
-	grunt.registerTask('dist', ['typescript', 'dist-js', 'compress']);
+	grunt.registerTask('dist', ['ts', 'template', 'concat', 'uglify']);
 
 	// Default task.
-	grunt.registerTask('default', ['clean:dist', 'dist']);
+	grunt.registerTask('default', ['clean', 'dist']);
+
+	grunt.registerTask('release', ['clean', 'dist', 'bowerRelease']);
 
 };

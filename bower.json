@@ -1,6 +1,6 @@
 {
   "name": "totvs-twebchannel",
-  "description": "",
+  "description": "A JavaScript TWebChannel for TOTVS Platform",
   "main": "src/js/totvs-twebchannel.js",
   "keywords": [
     "totvs",
@@ -20,6 +20,6 @@
     "bower_components",
     "test",
     "tests",
-	"target"
+    "target"
   ]
 }

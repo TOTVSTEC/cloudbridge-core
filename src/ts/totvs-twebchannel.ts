@@ -10,7 +10,7 @@ namespace TOTVS {
         dialog: any;
         internalWSPort: number;
 
-        static version = "1.0.1";
+        static version = "<%= package.version %>";
         static BLUETOOTH_FEATURE = 1;
         static NFC_FEATURE = 2;
         static WIFI_FEATURE = 3;
@@ -26,20 +26,20 @@ namespace TOTVS {
                 var baseUrl = "ws://127.0.0.1:" + this.internalWSPort;
                 var socket = new WebSocket(baseUrl);
 
-                socket.onclose = function () {
+                socket.onclose = function() {
                     console.error("WebChannel closed");
                 };
 
-                socket.onerror = function (error) {
+                socket.onerror = function(error) {
                     console.error("WebChannel error: " + error);
                 };
 
-                socket.onopen = function () {
-                    _this.qwebchannel = new QWebChannel(socket, function (channel) {
+                socket.onopen = function() {
+                    _this.qwebchannel = new QWebChannel(socket, function(channel) {
                         _this.dialog = channel.objects.mainDialog;
 
                         // Carrega mensageria global [CSS, JavaScript]
-                        _this.dialog.advplToJs.connect(function (codeType, codeContent, objectName) {
+                        _this.dialog.advplToJs.connect(function(codeType, codeContent, objectName) {
                             if (codeType == "js") {
                                 var scriptRef = document.createElement('script');
                                 scriptRef.setAttribute("type", "text/javascript");
@@ -59,7 +59,7 @@ namespace TOTVS {
 
                         // Executa callback
 						if (typeof callback === 'function')
-                        	callback();
+							callback();
                     });
                 }
             }
@@ -99,7 +99,7 @@ namespace TOTVS {
             this.dialog.jsToAdvpl("getCurrentPosition", onSuccess.name);
         }
 
-		testDevice(feature, onSuccess) : void {
+		testDevice(feature, onSuccess): void {
             var jsonCommand = {
                 'testFeature': feature,
                 'callBack': onSuccess.name
@@ -120,6 +120,64 @@ namespace TOTVS {
         openSettings(feature, onSuccess) {
             this.dialog.jsToAdvpl("openSettings", feature);
         }
+
+		getTempPath(onSuccess) {
+			this.dialog.jsToAdvpl("getTempPath", onSuccess.name);
+		}
+
+		// Aciona o vibracall do dispositivo
+		vibrate(milliseconds) {
+			this.dialog.jsToAdvpl("vibrate", milliseconds);
+		}
+
+		// Data Function BEGIN -----------------------------------------------------
+
+		// Recupera dados a partir de uma query
+		dbGet(query, onSuccess, onError) {
+			var jsonCommand = {
+				'query': query,
+				'callBackSuccess': onSuccess.name,
+				'callBackError': onError.name
+			}
+			this.dialog.jsToAdvpl("dbGet", JSON.stringify(jsonCommand));
+		}
+
+		// Executa query
+		dbExec(query, onSuccess, onError) {
+			var jsonCommand = {
+				'query': query,
+				'callBackSuccess': onSuccess.name,
+				'callBackError': onError.name
+			}
+			this.dialog.jsToAdvpl("dbExec", JSON.stringify(jsonCommand));
+		}
+
+		// Begin transaction
+		dbBegin(onSuccess, onError) {
+			var jsonCommand = {
+				'callBackSuccess': onSuccess.name,
+				'callBackError': onError.name
+			}
+			this.dialog.jsToAdvpl("dbBegin", JSON.stringify(jsonCommand));
+		}
+
+		// Commit
+		dbCommit(onSuccess, onError) {
+			var jsonCommand = {
+				'callBackSuccess': onSuccess.name,
+				'callBackError': onError.name
+			}
+			this.dialog.jsToAdvpl("dbCommit", JSON.stringify(jsonCommand));
+		}
+
+		// Rollback
+		dbRollback(onSuccess, onError) {
+			var jsonCommand = {
+				'callBackSuccess': onSuccess.name,
+				'callBackError': onError.name
+			}
+			this.dialog.jsToAdvpl("dbRollback", JSON.stringify(jsonCommand));
+		}
 
         jsToAdvpl(codeType, codeContent) {
             this.dialog.jsToAdvpl(codeType, codeContent);
