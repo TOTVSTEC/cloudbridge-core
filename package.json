@@ -1,6 +1,6 @@
 {
   "name": "totvs-twebchannel",
-  "version": "0.0.2",
+  "version": "0.0.3-SNAPSHOT",
   "description": "A JavaScript TWebChannel for TOTVS Platform",
   "main": "Gruntfile.js",
   "contributors": [

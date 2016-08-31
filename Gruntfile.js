@@ -97,13 +97,29 @@ module.exports = function(grunt) {
 			packageJson = grunt.file.readJSON('package.json'),
 			bowerJson = grunt.file.readJSON('bower.json');
 
+		if ((target !== 'major') && (target !== 'minor')) {
+			target = 'patch';
+		}
+
+		console.log('Current version: ', packageJson.version);
+
 		packageJson.version = semver.inc(packageJson.version, 'patch');
 		grunt.file.write('package.json', JSON.stringify(packageJson, null, 2) + '\n');
 
 		bowerJson.version = 'v' + packageJson.version;
 		grunt.file.write('bower.json', JSON.stringify(bowerJson, null, 2) + '\n');
 
+		console.log('Released version:', packageJson.version);
+
 		grunt.task.run(['clean', 'dist', 'bowerRelease']);
+
+		packageJson.version = semver.inc(packageJson.version, target) + '-SNAPSHOT';
+		grunt.file.write('package.json', JSON.stringify(packageJson, null, 2) + '\n');
+
+		bowerJson.version = 'v' + packageJson.version;
+		grunt.file.write('bower.json', JSON.stringify(bowerJson, null, 2) + '\n');
+
+		console.log('New dev version: ', packageJson.version);
 	});
 
 };
