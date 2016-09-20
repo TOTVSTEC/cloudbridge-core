@@ -179,6 +179,10 @@ namespace TOTVS {
 			this.dialog.jsToAdvpl("dbRollback", JSON.stringify(jsonCommand));
 		}
 
+		sendMessage(content, callback: Function) {
+            this.dialog.jsToAdvpl("MESSAGE", content, callback);
+		}
+
         jsToAdvpl(codeType, codeContent) {
             this.dialog.jsToAdvpl(codeType, codeContent);
         }
