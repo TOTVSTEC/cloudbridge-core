@@ -26,8 +26,10 @@ module.exports = function(grunt) {
 		template: {
 			js: {
 				options: {
-					data: {
-						package: pkg
+					data: function() {
+						return {
+							package: grunt.file.readJSON('package.json')
+						};
 					}
 				},
 				files: {
@@ -92,6 +94,33 @@ module.exports = function(grunt) {
 	// Default task.
 	grunt.registerTask('default', ['clean', 'dist']);
 
+	grunt.registerTask('bump', 'Bump version', function(target) {
+		var semver = require('semver'),
+			packageJson = grunt.file.readJSON('package.json'),
+			bowerJson = grunt.file.readJSON('bower.json');
+
+		var msg = 'Bumping (' + target + ') from "' + packageJson.version + '" to "';
+
+		if (target === 'release') {
+			packageJson.version = semver.inc(packageJson.version, 'patch');
+		}
+		else if (target === 'dev') {
+			packageJson.version = semver.inc(packageJson.version, 'patch') + '-SNAPSHOT';
+		}
+
+		msg += packageJson.version + '"\n';
+		console.log(msg);
+
+		bowerJson.version = 'v' + packageJson.version;
+
+		grunt.file.write('package.json', JSON.stringify(packageJson, null, 2) + '\n');
+		grunt.file.write('bower.json', JSON.stringify(bowerJson, null, 2) + '\n');
+	});
+
+	grunt.registerTask('release', ['clean', 'bump:release', 'dist', 'bowerRelease', 'bump:dev']);
+
+
+/*
 	grunt.registerTask('release', 'Build and release a new version', function(target) {
 		var semver = require('semver'),
 			packageJson = grunt.file.readJSON('package.json'),
@@ -121,5 +150,5 @@ module.exports = function(grunt) {
 
 		console.log('New dev version: ', packageJson.version);
 	});
-
+*/
 };
