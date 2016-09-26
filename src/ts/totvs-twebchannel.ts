@@ -2,12 +2,17 @@ declare class QWebChannel {
     constructor(socket: WebSocket, callback: Function);
 }
 
+declare class QExportedObject {
+	advplToJs: any;
+	jsToAdvpl(id: string, value: string, callback: Function);
+}
+
 namespace TOTVS {
 
     export class TWebChannel {
         socket: WebSocket;
         qwebchannel: QWebChannel;
-        dialog: any;
+        dialog: QExportedObject;
         internalWSPort: number;
 
         static version = "<%= package.version %>";
@@ -65,127 +70,119 @@ namespace TOTVS {
             }
         }
 
-        runAdvpl(command, onSuccess) {
+        runAdvpl(command: string, callback: Function) {
             // Formata JSON com o Bloco de Código e o callBack
             var jsonCommand = {
                 'codeBlock': command,
-                'callBack': onSuccess.name
+                'callBack': callback
             }
 
-            this.dialog.jsToAdvpl("runAdvpl", JSON.stringify(jsonCommand));
+            this.dialog.jsToAdvpl("runAdvpl", command, callback);
         }
 
-        getPicture(onSuccess) {
-            this.dialog.jsToAdvpl("getPicture", onSuccess.name);
+        getPicture(callback: Function) {
+            this.dialog.jsToAdvpl("getPicture", "", callback);
         }
 
-        barCodeScanner(onSuccess) {
-            this.dialog.jsToAdvpl("barCodeScanner", onSuccess.name);
+        barCodeScanner(callback: Function) {
+            this.dialog.jsToAdvpl("barCodeScanner", "", callback);
         }
 
-        pairedDevices(onSuccess) {
-            this.dialog.jsToAdvpl("pairedDevices", onSuccess.name);
+        pairedDevices(callback: Function) {
+            this.dialog.jsToAdvpl("pairedDevices", "", callback);
         }
 
-        unlockOrientation() {
-            this.dialog.jsToAdvpl("unlockOrientation", "");
+        unlockOrientation(callback: Function) {
+            this.dialog.jsToAdvpl("unlockOrientation", "", callback);
         }
 
-        lockOrientation() {
-            this.dialog.jsToAdvpl("lockOrientation", "");
+        lockOrientation(callback: Function) {
+            this.dialog.jsToAdvpl("lockOrientation", "", callback);
         }
 
-        getCurrentPosition(onSuccess) {
-            this.dialog.jsToAdvpl("getCurrentPosition", onSuccess.name);
+        getCurrentPosition(callback: Function) {
+            this.dialog.jsToAdvpl("getCurrentPosition", "", callback);
         }
 
-		testDevice(feature, onSuccess): void {
+		testDevice(feature: string, callback: Function): void {
             var jsonCommand = {
                 'testFeature': feature,
-                'callBack': onSuccess.name
+                'callBack': callback
             }
 
-            this.dialog.jsToAdvpl("testDevice", JSON.stringify(jsonCommand));
+            this.dialog.jsToAdvpl("testDevice", feature, callback);
         }
 
-        createNotification(id, title, message) {
+		createNotification(options: Object, callback: Function) {
+			/*
             var jsonCommand = {
                 'id': id,
                 'title': title,
                 'message': message
             }
-            this.dialog.jsToAdvpl("createNotification", JSON.stringify(jsonCommand));
+			*/
+
+            this.dialog.jsToAdvpl("createNotification", JSON.stringify(options), callback);
         }
 
-        openSettings(feature, onSuccess) {
-            this.dialog.jsToAdvpl("openSettings", feature);
+        openSettings(feature: string, callback: Function) {
+            this.dialog.jsToAdvpl("openSettings", feature, callback);
         }
 
-		getTempPath(onSuccess) {
-			this.dialog.jsToAdvpl("getTempPath", onSuccess.name);
+		getTempPath(callback: Function) {
+			this.dialog.jsToAdvpl("getTempPath", "", callback);
 		}
 
-		// Aciona o vibracall do dispositivo
-		vibrate(milliseconds) {
-			this.dialog.jsToAdvpl("vibrate", milliseconds);
+		vibrate(milliseconds: number, callback: Function) {
+			this.dialog.jsToAdvpl("vibrate", milliseconds.toString(), callback);
 		}
 
 		// Data Function BEGIN -----------------------------------------------------
 
 		// Recupera dados a partir de uma query
-		dbGet(query, onSuccess, onError) {
-			var jsonCommand = {
-				'query': query,
-				'callBackSuccess': onSuccess.name,
-				'callBackError': onError.name
-			}
-			this.dialog.jsToAdvpl("dbGet", JSON.stringify(jsonCommand));
+		dbGet(query: string, callback: Function) {
+			this.dialog.jsToAdvpl("dbGet", query, callback);
 		}
 
 		// Executa query
-		dbExec(query, onSuccess, onError) {
-			var jsonCommand = {
-				'query': query,
-				'callBackSuccess': onSuccess.name,
-				'callBackError': onError.name
+		dbExec(query: string, callback: Function) {
+			this.dialog.jsToAdvpl("dbExec", query, callback);
+		}
+
+		dbExecuteScalar(query: string, callback: Function) {
+			if (callback) {
+				this.dialog.jsToAdvpl("DBEXECSCALAR", query, function(data) {
+					var json = JSON.parse(data);
+
+					if (!json.data)
+						json.data = null;
+
+					callback(json);
+				});
+			} 
+			else {
+				this.dialog.jsToAdvpl("DBEXECSCALAR", query, null);
 			}
-			this.dialog.jsToAdvpl("dbExec", JSON.stringify(jsonCommand));
 		}
 
 		// Begin transaction
-		dbBegin(onSuccess, onError) {
-			var jsonCommand = {
-				'callBackSuccess': onSuccess.name,
-				'callBackError': onError.name
-			}
-			this.dialog.jsToAdvpl("dbBegin", JSON.stringify(jsonCommand));
+		dbBegin(callback: Function) {
+			this.dialog.jsToAdvpl("dbBegin", "", callback);
 		}
 
 		// Commit
-		dbCommit(onSuccess, onError) {
-			var jsonCommand = {
-				'callBackSuccess': onSuccess.name,
-				'callBackError': onError.name
-			}
-			this.dialog.jsToAdvpl("dbCommit", JSON.stringify(jsonCommand));
+		dbCommit(callback: Function, onError) {
+			this.dialog.jsToAdvpl("dbCommit", "", callback);
 		}
 
 		// Rollback
-		dbRollback(onSuccess, onError) {
-			var jsonCommand = {
-				'callBackSuccess': onSuccess.name,
-				'callBackError': onError.name
-			}
-			this.dialog.jsToAdvpl("dbRollback", JSON.stringify(jsonCommand));
+		dbRollback(callback: Function) {
+			this.dialog.jsToAdvpl("dbRollback", "", callback);
 		}
 
-		sendMessage(content, callback: Function) {
+		sendMessage(content: string, callback: Function) {
             this.dialog.jsToAdvpl("MESSAGE", content, callback);
 		}
-
-        jsToAdvpl(codeType, codeContent) {
-            this.dialog.jsToAdvpl(codeType, codeContent);
-        }
 
     }
 
