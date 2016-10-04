@@ -1,5 +1,11 @@
+declare class Promise {
+	constructor(executor: Function);
+	then: Function;
+	catch: Function;
+}
+
 declare class QWebChannel {
-    constructor(socket: WebSocket, callback: Function);
+	constructor(socket: WebSocket, callback: Function);
 }
 
 declare class QExportedObject {
@@ -9,109 +15,108 @@ declare class QExportedObject {
 
 namespace TOTVS {
 
-    export class TWebChannel {
-        socket: WebSocket;
-        qwebchannel: QWebChannel;
-        dialog: QExportedObject;
-        internalWSPort: number;
+	export class TWebChannel {
+		private socket: WebSocket;
+		private qwebchannel: QWebChannel;
+		private dialog: QExportedObject;
+		private internalWSPort: number;
+		private __send: Function;
 
-        static version = "<%= package.version %>";
-        static BLUETOOTH_FEATURE = 1;
-        static NFC_FEATURE = 2;
-        static WIFI_FEATURE = 3;
-        static LOCATION_FEATURE = 4;
-        static CONNECTED_WIFI = 5;
-        static CONNECTED_MOBILE = 6;
+		static version = "<%= package.version %>";
+		static BLUETOOTH_FEATURE = 1;
+		static NFC_FEATURE = 2;
+		static WIFI_FEATURE = 3;
+		static LOCATION_FEATURE = 4;
+		static CONNECTED_WIFI = 5;
+		static CONNECTED_MOBILE = 6;
 
-        constructor(port: number, callback: Function) {
-            this.internalWSPort = port;
+		static JSON_FLAG = "#JSON#";
 
-            if (this.internalWSPort) {
-                var _this = this;
-                var baseUrl = "ws://127.0.0.1:" + this.internalWSPort;
-                var socket = new WebSocket(baseUrl);
+		constructor(port: number, callback: Function) {
+			if (window['Promise'] !== undefined) {
+				this.__send = this.__send_promise;
+			}
+			else {
+				this.__send = this.__send_callback;
+			}
 
-                socket.onclose = function() {
-                    console.error("WebChannel closed");
-                };
+			this.internalWSPort = port;
 
-                socket.onerror = function(error) {
-                    console.error("WebChannel error: " + error);
-                };
+			if (this.internalWSPort) {
+				var _this = this;
+				var baseUrl = "ws://127.0.0.1:" + this.internalWSPort;
+				var socket = new WebSocket(baseUrl);
 
-                socket.onopen = function() {
-                    _this.qwebchannel = new QWebChannel(socket, function(channel) {
-                        _this.dialog = channel.objects.mainDialog;
+				socket.onclose = function() {
+					console.error("WebChannel closed");
+				};
 
-                        // Carrega mensageria global [CSS, JavaScript]
-                        _this.dialog.advplToJs.connect(function(codeType, codeContent, objectName) {
-                            if (codeType == "js") {
-                                var scriptRef = document.createElement('script');
-                                scriptRef.setAttribute("type", "text/javascript");
-                                scriptRef.innerText = codeContent;
+				socket.onerror = function(error) {
+					console.error("WebChannel error: " + error);
+				};
 
-                                document.getElementsByTagName("head")[0].appendChild(scriptRef);
-                            }
-                            else if (codeType == "css") {
-                                var linkRef = document.createElement("link");
-                                linkRef.setAttribute("rel", "stylesheet");
-                                linkRef.setAttribute("type", "text/css");
-                                linkRef.innerText = codeContent;
+				socket.onopen = function() {
+					_this.qwebchannel = new QWebChannel(socket, function(channel) {
+						_this.dialog = channel.objects.mainDialog;
 
-                                document.getElementsByTagName("head")[0].appendChild(linkRef)
-                            }
-                        });
+						// Carrega mensageria global [CSS, JavaScript]
+						_this.dialog.advplToJs.connect(function(codeType, codeContent, objectName) {
+							if (codeType == "js") {
+								var scriptRef = document.createElement('script');
+								scriptRef.setAttribute("type", "text/javascript");
+								scriptRef.innerText = codeContent;
 
-                        // Executa callback
+								document.getElementsByTagName("head")[0].appendChild(scriptRef);
+							}
+							else if (codeType == "css") {
+								var linkRef = document.createElement("link");
+								linkRef.setAttribute("rel", "stylesheet");
+								linkRef.setAttribute("type", "text/css");
+								linkRef.innerText = codeContent;
+
+								document.getElementsByTagName("head")[0].appendChild(linkRef)
+							}
+						});
+
+						// Executa callback
 						if (typeof callback === 'function')
 							callback();
-                    });
-                }
-            }
-        }
+					});
+				}
+			}
+		}
 
-        runAdvpl(command: string, callback: Function) {
-            // Formata JSON com o Bloco de Código e o callBack
-            var jsonCommand = {
-                'codeBlock': command,
-                'callBack': callback
-            }
+		runAdvpl(command: string, callback: Function) {
+			return this.__send("runAdvpl", command, callback);
+		}
 
-            this.dialog.jsToAdvpl("runAdvpl", command, callback);
-        }
+		getPicture(callback: Function) {
+			return this.__send("getPicture", "", callback);
+		}
 
-        getPicture(callback: Function) {
-            this.dialog.jsToAdvpl("getPicture", "", callback);
-        }
+		barCodeScanner(callback: Function) {
+			return this.__send("barCodeScanner", "", callback);
+		}
 
-        barCodeScanner(callback: Function) {
-            this.dialog.jsToAdvpl("barCodeScanner", "", callback);
-        }
+		pairedDevices(callback: Function) {
+			return this.__send("pairedDevices", "", callback);
+		}
 
-        pairedDevices(callback: Function) {
-            this.dialog.jsToAdvpl("pairedDevices", "", callback);
-        }
+		unlockOrientation(callback: Function) {
+			return this.__send("unlockOrientation", "", callback);
+		}
 
-        unlockOrientation(callback: Function) {
-            this.dialog.jsToAdvpl("unlockOrientation", "", callback);
-        }
+		lockOrientation(callback: Function) {
+			return this.__send("lockOrientation", "", callback);
+		}
 
-        lockOrientation(callback: Function) {
-            this.dialog.jsToAdvpl("lockOrientation", "", callback);
-        }
+		getCurrentPosition(callback: Function) {
+			return this.__send("getCurrentPosition", "", callback);
+		}
 
-        getCurrentPosition(callback: Function) {
-            this.dialog.jsToAdvpl("getCurrentPosition", "", callback);
-        }
-
-		testDevice(feature: string, callback: Function): void {
-            var jsonCommand = {
-                'testFeature': feature,
-                'callBack': callback
-            }
-
-            this.dialog.jsToAdvpl("testDevice", feature, callback);
-        }
+		testDevice(feature: number, callback: Function): void {
+			return this.__send("testDevice", String(feature), callback);
+		}
 
 		createNotification(options: Object, callback: Function) {
 			/*
@@ -122,68 +127,134 @@ namespace TOTVS {
             }
 			*/
 
-            this.dialog.jsToAdvpl("createNotification", JSON.stringify(options), callback);
-        }
+			return this.__send("createNotification", options, callback);
+		}
 
-        openSettings(feature: string, callback: Function) {
-            this.dialog.jsToAdvpl("openSettings", feature, callback);
-        }
+		openSettings(feature: number, callback: Function) {
+			return this.__send("openSettings", String(feature), callback);
+		}
 
 		getTempPath(callback: Function) {
-			this.dialog.jsToAdvpl("getTempPath", "", callback);
+			return this.__send("getTempPath", "", callback);
 		}
 
 		vibrate(milliseconds: number, callback: Function) {
-			this.dialog.jsToAdvpl("vibrate", milliseconds.toString(), callback);
+			return this.__send("vibrate", milliseconds, callback);
 		}
 
 		// Data Function BEGIN -----------------------------------------------------
 
 		// Recupera dados a partir de uma query
 		dbGet(query: string, callback: Function) {
-			this.dialog.jsToAdvpl("dbGet", query, callback);
+			return this.__send("dbGet", query, callback);
 		}
 
 		// Executa query
 		dbExec(query: string, callback: Function) {
-			this.dialog.jsToAdvpl("dbExec", query, callback);
+			return this.__send("dbExec", query, callback);
 		}
 
 		dbExecuteScalar(query: string, callback: Function) {
-			if (callback) {
-				this.dialog.jsToAdvpl("DBEXECSCALAR", query, function(data) {
-					var json = JSON.parse(data);
-
-					if (!json.data)
-						json.data = null;
-
-					callback(json);
-				});
-			} 
-			else {
-				this.dialog.jsToAdvpl("DBEXECSCALAR", query, null);
-			}
+			return this.__send("DBEXECSCALAR", query, callback);
 		}
 
 		// Begin transaction
 		dbBegin(callback: Function) {
-			this.dialog.jsToAdvpl("dbBegin", "", callback);
+			return this.__send("dbBegin", "", callback);
 		}
 
 		// Commit
 		dbCommit(callback: Function, onError) {
-			this.dialog.jsToAdvpl("dbCommit", "", callback);
+			return this.__send("dbCommit", "", callback);
 		}
 
 		// Rollback
 		dbRollback(callback: Function) {
-			this.dialog.jsToAdvpl("dbRollback", "", callback);
+			return this.__send("dbRollback", "", callback);
 		}
 
 		sendMessage(content: string, callback: Function) {
-            this.dialog.jsToAdvpl("MESSAGE", content, callback);
+			return this.__send("MESSAGE", content, callback);
 		}
 
-    }
+		private __send_promise(id: string, content: string, onSuccess: Function, onError: Function) {
+			var _this = this;
+
+			var promise = new Promise(function(resolve, reject) {
+				try {
+					_this.dialog.jsToAdvpl(id, _this.__JSON_stringify(content), function(data) {
+						resolve(_this.__JSON_parse(data));
+					});
+				}
+				catch (error) {
+					reject(error);
+				}
+			});
+
+			if ((onSuccess) && (typeof onSuccess === 'function')) {
+				promise.then(onSuccess);
+			}
+
+			if ((onError) && (typeof onError === 'function')) {
+				promise.catch(onError);
+			}
+
+			return promise;
+		}
+
+		private __send_callback(id: string, content: string, onSuccess: Function, onError: Function) {
+			var _this = this;
+
+			try {
+				if (typeof onSuccess === 'function') {
+					_this.dialog.jsToAdvpl(id, _this.__JSON_stringify(content), function(data) {
+						onSuccess(_this.__JSON_parse(data));
+					});
+				}
+				else {
+					_this.dialog.jsToAdvpl(id, _this.__JSON_stringify(content), null);
+				}
+			}
+			catch (error) {
+				if ((onError) && (typeof onError === 'function')) {
+					onError(error);
+				}
+				else {
+					throw error;
+				}
+			}
+		}
+
+		private __JSON_stringify(data: any) {
+			if (data === null) {
+				return null;
+			}
+			else {
+				if ((Array.isArray(data)) || (typeof data === "object")) {
+					return TWebChannel.JSON_FLAG + JSON.stringify(data) + TWebChannel.JSON_FLAG;
+				}
+			}
+
+			return data.toString()
+		}
+
+		private __JSON_parse(data: any) {
+			if (typeof data === 'string') {
+				var flag = TWebChannel.JSON_FLAG;
+
+				if (data.length >= (2 + (flag.length * 2))) {
+					var begin = flag.length,
+						end = data.length - flag.length;
+
+					if ((data.substr(0, begin) === flag) && (data.substr(end) === flag)) {
+						return JSON.parse(data.substring(begin, end));
+					}
+				}
+			}
+
+			return data;
+		}
+
+	}
 
 }
