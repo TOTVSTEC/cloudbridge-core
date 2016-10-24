@@ -8,8 +8,6 @@ let path = require('path'),
 const GITHUB_PREFIX = 'https://github.com/TOTVSTEC/',
 	REPO_NAME = 'bower-totvs-twebchannel';
 
-
-
 module.exports = function run() {
 	git = new GitRepo({
 		cwd: path.join(__basedir, 'build', 'release', REPO_NAME),

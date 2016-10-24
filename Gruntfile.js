@@ -124,14 +124,12 @@ module.exports = function(grunt) {
 			releaseTWebChannel = require('./src/util/releases/totvs-twebchannel'),
 			releaseAppBase = require('./src/util/releases/cloudbridge-app-base');
 
-		Q.all([
-			releaseTWebChannel(),
-			releaseAppBase()
-		])
-		.catch(function(error) {
-			console.error(error);
-		})
-		.then(done);
+		Q().then(releaseTWebChannel)
+			.then(releaseAppBase)
+			.catch(function(error) {
+				console.error(error);
+			})
+			.then(done);
 	});
 
 	grunt.registerTask('bump', 'Bump version', function(target) {
@@ -165,11 +163,13 @@ module.exports = function(grunt) {
 			pkg = grunt.file.readJSON('package.json');
 
 		git.commit("Version " + pkg.version);
-		git.tag('v' + pkg.version, "Version " + pkg.version);
+
+		if (target == 'tag')
+			git.tag('v' + pkg.version, "Version " + pkg.version);
 
 		git.commit();
 	});
 
-	grunt.registerTask('release', ['clean', 'bump:release', 'dist', 'deploy', 'bump:dev', 'commit']);
+	grunt.registerTask('release', ['clean', 'bump:release', 'dist', 'deploy', 'commit:tag', 'bump:dev', 'commit']);
 
 };
