@@ -4,4 +4,4 @@ build
 .tmp
 .vscode
 .tscache
-src/ts/.baseDir.ts
+**/.baseDir.ts

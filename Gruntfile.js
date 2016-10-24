@@ -1,11 +1,23 @@
 'use strict';
 
+global.__basedir = __dirname;
+
+let path = require('path'),
+	Q = require('q');
+
+var twebchannel = {
+	name: 'totvs-twebchannel',
+	dist: path.join('build', 'dist', 'totvs-twebchannel')
+};
+
 module.exports = function(grunt) {
 	var pkg = grunt.file.readJSON('package.json');
 
 	grunt.initConfig({
 
 		pkg: pkg,
+
+		twebchannel: twebchannel,
 
 		// Task configuration.
 		clean: {
@@ -14,8 +26,7 @@ module.exports = function(grunt) {
 
 		ts: {
 			dist: {
-				src: ['src/ts/**/*.ts'],
-				dest: 'build/stagging/ts',
+				tsconfig: true,
 				options: {
 					sourceMap: true,
 					declaration: true
@@ -33,7 +44,7 @@ module.exports = function(grunt) {
 					}
 				},
 				files: {
-					'build/stagging/js/<%= pkg.name %>.js': ['<%= ts.dist.dest %>/<%= pkg.name %>.js']
+					'build/stagging/js/<%= twebchannel.name %>.js': ['build/stagging/ts/<%= twebchannel.name %>.js']
 				}
 			}
 		},
@@ -41,10 +52,10 @@ module.exports = function(grunt) {
 		concat: {
 			dist: {
 				src: [
-					'src/js/qwebchannel-5.7.0.js',
-					'build/stagging/js/<%= pkg.name %>.js'
+					'src/resources/js/qwebchannel-5.7.0.js',
+					'build/stagging/js/<%= twebchannel.name %>.js'
 				],
-				dest: 'build/dist/<%= pkg.name %>.js'
+				dest: '<%= twebchannel.dist %>/<%= twebchannel.name %>.js'
 			}
 		},
 
@@ -57,27 +68,41 @@ module.exports = function(grunt) {
 			},
 			dist: {
 				src: '<%= concat.dist.dest %>',
-				dest: 'build/dist/<%= pkg.name %>.min.js'
+				dest: '<%= twebchannel.dist %>/<%= twebchannel.name %>.min.js'
 			}
 		},
 
 		bowerRelease: {
 			options: {
-				main: '<%= pkg.name %>.min.js'
+				main: '<%= twebchannel.name %>.min.js'
 			},
 			stable: {
 				options: {
 					endpoint: 'https://github.com/TOTVSTEC/bower-totvs-twebchannel.git',
-					packageName: '<%= pkg.name %>',
+					packageName: '<%= twebchannel.name %>',
 					stageDir: 'build/release'
 				},
 				files: [
 					{
 						expand: true,
-						cwd: 'build/dist/',
-						src: ['<%= pkg.name %>.js', '<%= pkg.name %>.min.js']
+						cwd: '<%= twebchannel.dist %>/',
+						src: ['<%= twebchannel.name %>.js', '<%= twebchannel.name %>.min.js']
 					}
 				]
+			}
+		},
+
+		git_deploy: {
+			appbase: {
+				options: {
+					//url: 'git@github.com:TOTVSTEC/cloudbridge-app-base.git',
+					url: 'https://github.com/TOTVSTEC/cloudbridge-app-base.git',
+					branch: 'master',
+					message: 'Bumped version to v<%= pkg.version %>',
+					tag: '<%= pkg.version %>',
+					tagMessage: 'Bumped version to v<%= pkg.version %>'
+				},
+				src: 'build/rpo'
 			}
 		}
 
@@ -93,6 +118,18 @@ module.exports = function(grunt) {
 
 	// Default task.
 	grunt.registerTask('default', ['clean', 'dist']);
+
+	grunt.registerTask('testDeploy', 'blabla', function(target) {
+		let done = this.async(),
+			releaseTWebChannel = require('./src/util/releases/totvs-twebchannel'),
+			releaseAppBase = require('./src/util/releases/cloudbridge-app-base');
+
+		Q.all([
+			releaseTWebChannel(),
+			releaseAppBase()
+		])
+		.then(done);
+	});
 
 	grunt.registerTask('bump', 'Bump version', function(target) {
 		var semver = require('semver'),
@@ -117,6 +154,19 @@ module.exports = function(grunt) {
 		grunt.file.write('bower.json', JSON.stringify(bowerJson, null, 2) + '\n');
 	});
 
-	grunt.registerTask('release', ['clean', 'bump:release', 'dist', 'bowerRelease', 'bump:dev']);
+	grunt.registerTask('commit', 'Commit self', function(target) {
+		let GitRepo = require(__basedir + '/src/util/git'),
+			git = new GitRepo({
+				cwd: __basedir
+			}),
+			pkg = grunt.file.readJSON('package.json');
+
+		git.commit("Version " + pkg.version);
+		git.tag('v' + pkg.version, "Version " + pkg.version);
+
+		git.commit();
+	});
+
+	grunt.registerTask('release', ['clean', 'bump:release', 'dist', 'deploy', 'bump:dev', 'commit']);
 
 };
