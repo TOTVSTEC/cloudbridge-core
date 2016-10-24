@@ -16,7 +16,8 @@ module.exports = function run() {
 
 	return Q()
 		.then(checkout)
-		.then(copy);
+		.then(copy)
+		.then(commit);
 };
 
 function copy() {
