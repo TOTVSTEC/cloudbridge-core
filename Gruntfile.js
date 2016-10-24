@@ -119,7 +119,7 @@ module.exports = function(grunt) {
 	// Default task.
 	grunt.registerTask('default', ['clean', 'dist']);
 
-	grunt.registerTask('testDeploy', 'blabla', function(target) {
+	grunt.registerTask('deploy', 'Deploy new artifacts to his repos', function(target) {
 		let done = this.async(),
 			releaseTWebChannel = require('./src/util/releases/totvs-twebchannel'),
 			releaseAppBase = require('./src/util/releases/cloudbridge-app-base');
@@ -128,6 +128,9 @@ module.exports = function(grunt) {
 			releaseTWebChannel(),
 			releaseAppBase()
 		])
+		.catch(function(error) {
+			console.error(error);
+		})
 		.then(done);
 	});
 
