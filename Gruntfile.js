@@ -89,9 +89,6 @@ module.exports = function(grunt) {
 
 		Q().then(releaseTWebChannel)
 			.then(releaseAppBase)
-			.catch(function(error) {
-				console.error(error);
-			})
 			.then(done);
 	});
 
