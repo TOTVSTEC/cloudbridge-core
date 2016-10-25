@@ -128,7 +128,7 @@ module.exports = function(grunt) {
 		git.commit("Version " + pkg.version);
 
 		if (target == 'tag') {
-			git.tag('v' + pkg.version, "Version " + pkg.version);`
+			git.tag('v' + pkg.version, "Version " + pkg.version);
 		}
 
 		git.commit();
