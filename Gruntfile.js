@@ -3,7 +3,11 @@
 global.__basedir = __dirname;
 
 let path = require('path'),
-	Q = require('q');
+	Q = require('q'),
+	AppServer = require('totvs-platform-helper/appserver'),
+	TDS = require('totvs-platform-helper/tds');
+
+const APPSERVER_DIR = path.join(__basedir, 'src', 'resources', 'appserver');
 
 module.exports = function(grunt) {
 	var pkg = grunt.file.readJSON('package.json');
@@ -77,7 +81,7 @@ module.exports = function(grunt) {
 	require('time-grunt')(grunt);
 
 	// Full distribution task.
-	grunt.registerTask('dist', ['ts', 'template', 'concat', 'uglify']);
+	grunt.registerTask('dist', ['ts', 'template', 'concat', 'uglify', 'compile']);
 
 	// Default task.
 	grunt.registerTask('default', ['clean', 'dist']);
@@ -92,28 +96,62 @@ module.exports = function(grunt) {
 			.then(done);
 	});
 
-	grunt.registerTask('bump', 'Bump version', function(target) {
-		var semver = require('semver'),
-			packageJson = grunt.file.readJSON('package.json'),
-			bowerJson = grunt.file.readJSON('bower.json');
+	grunt.registerTask('compile', 'Compile AdvPL', function(target) {
+		let done = this.async(),
+			appserver = new AppServer(APPSERVER_DIR),
+			tds = new TDS(),
+			tdsOptions = {
+				serverType: "Logix",
+				server: "127.0.0.1",
+				port: -1,
+				build: "7.00.150715P",
+				recompile: true,
+				environment: "ENVIRONMENT",
+				program: [
+					path.join(__basedir, 'src', 'components', 'app-base', 'src')
+				],
+				includes: [
+					path.join(__basedir, 'src', 'resources', 'includes'),
+					path.join(__basedir, 'src', 'components', 'app-base', 'includes')
+				]
+			};
 
-		var msg = 'Bumping version from "' + packageJson.version + '" to "';
+		grunt.file.mkdir(path.join(__basedir, 'build', 'dist'));
 
-		if (target === 'release') {
-			packageJson.version = semver.inc(packageJson.version, 'patch');
-		}
-		else if (target === 'dev') {
-			packageJson.version = semver.inc(packageJson.version, 'patch') + '-SNAPSHOT';
-		}
+		return appserver.start()
+			.then(function() {
+				tdsOptions.port = appserver.tcpPort;
 
-		msg += packageJson.version + '"\n';
-		console.log(msg);
-
-		bowerJson.version = 'v' + packageJson.version;
-
-		grunt.file.write('package.json', JSON.stringify(packageJson, null, 2) + '\n');
-		grunt.file.write('bower.json', JSON.stringify(bowerJson, null, 2) + '\n');
+				return tds.compile(tdsOptions);
+			})
+			.then(function() {
+				return appserver.stop();
+			})
+			.then(done);
 	});
+
+	grunt.registerTask('bump', 'Bump version', function(target) {
+			var semver = require('semver'),
+				packageJson = grunt.file.readJSON('package.json'),
+				bowerJson = grunt.file.readJSON('bower.json');
+
+			var msg = 'Bumping version from "' + packageJson.version + '" to "';
+
+			if (target === 'release') {
+				packageJson.version = semver.inc(packageJson.version, 'patch');
+			}
+			else if (target === 'dev') {
+				packageJson.version = semver.inc(packageJson.version, 'patch') + '-SNAPSHOT';
+			}
+
+			msg += packageJson.version + '"\n';
+			console.log(msg);
+
+			bowerJson.version = 'v' + packageJson.version;
+
+			grunt.file.write('package.json', JSON.stringify(packageJson, null, 2) + '\n');
+			grunt.file.write('bower.json', JSON.stringify(bowerJson, null, 2) + '\n');
+		});
 
 	grunt.registerTask('commit', 'Commit self', function(target) {
 		let GitRepo = require(__basedir + '/src/util/git'),
