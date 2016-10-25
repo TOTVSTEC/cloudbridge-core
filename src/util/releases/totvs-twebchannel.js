@@ -1,5 +1,6 @@
 let path = require('path'),
 	shelljs = require('shelljs'),
+	fs = require('fs'),
 	Q = require('q'),
 	GitRepo = require(__basedir + '/src/util/git'),
 	git = null;

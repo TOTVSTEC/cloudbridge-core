@@ -5,11 +5,6 @@ global.__basedir = __dirname;
 let path = require('path'),
 	Q = require('q');
 
-var twebchannel = {
-	name: 'totvs-twebchannel',
-	dist: path.join('build', 'dist', 'totvs-twebchannel')
-};
-
 module.exports = function(grunt) {
 	var pkg = grunt.file.readJSON('package.json');
 
@@ -17,9 +12,11 @@ module.exports = function(grunt) {
 
 		pkg: pkg,
 
-		twebchannel: twebchannel,
+		twebchannel: {
+			name: 'totvs-twebchannel',
+			dist: path.join('build', 'dist', 'totvs-twebchannel')
+		},
 
-		// Task configuration.
 		clean: {
 			dist: ['build']
 		},
@@ -69,40 +66,6 @@ module.exports = function(grunt) {
 			dist: {
 				src: '<%= concat.dist.dest %>',
 				dest: '<%= twebchannel.dist %>/<%= twebchannel.name %>.min.js'
-			}
-		},
-
-		bowerRelease: {
-			options: {
-				main: '<%= twebchannel.name %>.min.js'
-			},
-			stable: {
-				options: {
-					endpoint: 'https://github.com/TOTVSTEC/bower-totvs-twebchannel.git',
-					packageName: '<%= twebchannel.name %>',
-					stageDir: 'build/release'
-				},
-				files: [
-					{
-						expand: true,
-						cwd: '<%= twebchannel.dist %>/',
-						src: ['<%= twebchannel.name %>.js', '<%= twebchannel.name %>.min.js']
-					}
-				]
-			}
-		},
-
-		git_deploy: {
-			appbase: {
-				options: {
-					//url: 'git@github.com:TOTVSTEC/cloudbridge-app-base.git',
-					url: 'https://github.com/TOTVSTEC/cloudbridge-app-base.git',
-					branch: 'master',
-					message: 'Bumped version to v<%= pkg.version %>',
-					tag: '<%= pkg.version %>',
-					tagMessage: 'Bumped version to v<%= pkg.version %>'
-				},
-				src: 'build/rpo'
 			}
 		}
 
@@ -164,8 +127,9 @@ module.exports = function(grunt) {
 
 		git.commit("Version " + pkg.version);
 
-		if (target == 'tag')
-			git.tag('v' + pkg.version, "Version " + pkg.version);
+		if (target == 'tag') {
+			git.tag('v' + pkg.version, "Version " + pkg.version);`
+		}
 
 		git.commit();
 	});

@@ -1,6 +1,6 @@
 {
   "name": "cloudbridge-app-lib",
-  "version": "0.0.12-SNAPSHOT",
+  "version": "0.0.9-SNAPSHOT",
   "description": "The Cloudbridge AdvPL/JavaScript application library",
   "main": "Gruntfile.js",
   "contributors": [
@@ -16,11 +16,9 @@
   "license": "MIT",
   "devDependencies": {
     "grunt": "^1.0.1",
-    "grunt-bower-release": "^0.0.5",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-uglify": "^2.0.0",
-    "grunt-git-deploy": "^0.3.1",
     "grunt-template": "^1.0.0",
     "grunt-ts": "^5.5.1",
     "load-grunt-tasks": "^3.5.2",
