@@ -67,16 +67,6 @@ return
 
 static Function _OnLoadFinished(app, url)
 	Local script
-/*
-	script:= "document.dispatchEvent("
-	script+=     "new CustomEvent('cloudbridgeready', {"
-	script+=         "'detail': {"
-	script+=             "'port': " + AllTrim(Str(app:WSPort))
-	script+=         "}"
-	script+=     "})"
-	script+= ");"
-*/
-
 	script:= "TOTVS.TWebChannel.start(" + AllTrim(Str(app:WSPort)) + ");"
 
 	app:ExecuteJavaScript(script)
