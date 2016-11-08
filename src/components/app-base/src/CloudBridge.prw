@@ -40,7 +40,7 @@ static Function _CreateComponents(app)
     app:WSPort:= app:WebChannel:connect()
 
     app:WebView := TWebEngine():New(app:MainWindow, 0, 0, 100, 100,, app:WSPort)
-    app:WebView:bLoadFinished := {|webview, url| app:OnLoadFinished(url) }
+    app:WebView:bLoadFinished := {|webview, url| _OnLoadFinished(app, url) }
     app:WebView:setAsMain() // Define como WebEngine que recebera o KEY_BACK (Android)
     app:WebView:Align := CONTROL_ALIGN_ALLCLIENT
 return
@@ -65,6 +65,24 @@ static Function _SaveSetting(section, key, value)
 	WritePProString(section, key, value, ini)
 return
 
+static Function _OnLoadFinished(app, url)
+	Local script
+/*
+	script:= "document.dispatchEvent("
+	script+=     "new CustomEvent('cloudbridgeready', {"
+	script+=         "'detail': {"
+	script+=             "'port': " + AllTrim(Str(app:WSPort))
+	script+=         "}"
+	script+=     "})"
+	script+= ");"
+*/
+
+	script:= "TOTVS.TWebChannel.start(" + AllTrim(Str(app:WSPort)) + ");"
+
+	app:ExecuteJavaScript(script)
+
+	app:OnLoadFinished(url)
+return
 
 static Function _TestServerIp(ip)
 	Local timeout:= 2
@@ -145,7 +163,7 @@ static Function _ExtractFiles(app)
 	//Local outputPath := "\cloudbridge"
 	Local outputPath := GetPvProfString("config", "AndroidPath", "", GetRemoteIniName())
 
-	
+
 	//if (OutputPath == "")
 	//	OutputPath := GetPvProfString("http", "Path", "", GetSrvIniName())
 	//else
@@ -254,7 +272,7 @@ static Function _ReceivedMessage(app, what, content)
 	elseif what == "DBROLLBACK"
 		result:= _DbRollback(app, value)
 	else
-		ConOut("[_ReceivedMessage] Mensagem n�o mapeada! '" + what + "'")
+		ConOut("[_ReceivedMessage] Mensagem não mapeada! '" + what + "'")
 	endif
 
 	Return JSON_Stringify(result)
@@ -370,7 +388,7 @@ Static Function _DbGet(app, query)
 		end
 
 		TRB->(dbCloseArea())
-	
+
 		result:set("data", queryData)
 	endif
 

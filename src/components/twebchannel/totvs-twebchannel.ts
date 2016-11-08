@@ -6,8 +6,10 @@ namespace TOTVS {
 		private socket: WebSocket;
 		private qwebchannel: QWebChannel;
 		private dialog: QExportedObject;
-		private internalWSPort: number;
+		private internalWSPort: number = -1;
 		private __send: Function;
+
+		static instance: TWebChannel = null;
 
 		static version = "<%= package.version %>";
 		static BLUETOOTH_FEATURE = 1;
@@ -16,7 +18,6 @@ namespace TOTVS {
 		static LOCATION_FEATURE = 4;
 		static CONNECTED_WIFI = 5;
 		static CONNECTED_MOBILE = 6;
-
 		static JSON_FLAG = "#JSON#";
 
 		constructor(port: number, callback: Function) {
@@ -27,9 +28,24 @@ namespace TOTVS {
 				this.__send = this.__send_callback;
 			}
 
-			this.internalWSPort = port;
+			if ((callback === undefined) && (typeof port === 'function')) {
+				callback = port;
+				port = undefined;
+			}
 
-			if (this.internalWSPort) {
+			if (port !== undefined) {
+				if (typeof port !== 'number')
+					throw new TypeError('Parameter "port" must be numeric.');
+
+				this.internalWSPort = port;
+			}
+
+
+			if (this.internalWSPort === -1) {
+				throw new Error('Parameter "port" must be numeric.');
+			}
+
+			if (this.internalWSPort > -1) {
 				var _this = this;
 				var baseUrl = "ws://127.0.0.1:" + this.internalWSPort;
 				var socket = new WebSocket(baseUrl);
@@ -73,6 +89,35 @@ namespace TOTVS {
 			}
 		}
 
+		static getChannel() {
+
+		}
+
+		static start(port: number) {
+			if (TWebChannel.instance === null) {
+				var channel = new TWebChannel(port, function() {
+					TWebChannel.instance = channel;
+					TWebChannel.emit_cloudbridgeready();
+				});
+			}
+			else {
+				TWebChannel.emit_cloudbridgeready();
+			}
+		}
+
+		static emit_cloudbridgeready() {
+			var event = new CustomEvent('cloudbridgeready', {
+				'detail': {
+					'channel': TWebChannel.instance
+				}
+			});
+
+			//event['channel'] = channel;
+			//event['port'] = port;
+
+			document.dispatchEvent(event);
+		}
+
 		runAdvpl(command: string, callback: Function) {
 			return this.__send("runAdvpl", command, callback);
 		}
@@ -106,14 +151,6 @@ namespace TOTVS {
 		}
 
 		createNotification(options: Object, callback: Function) {
-			/*
-            var jsonCommand = {
-                'id': id,
-                'title': title,
-                'message': message
-            }
-			*/
-
 			return this.__send("createNotification", options, callback);
 		}
 
