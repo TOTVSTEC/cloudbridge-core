@@ -97,23 +97,23 @@ namespace TOTVS {
 			if (TWebChannel.instance === null) {
 				var channel = new TWebChannel(port, function() {
 					TWebChannel.instance = channel;
-					TWebChannel.emit_cloudbridgeready();
+					TWebChannel.emit('cloudbridgeready');
 				});
 			}
 			else {
-				TWebChannel.emit_cloudbridgeready();
+				TWebChannel.emit('cloudbridgeready');
 			}
 		}
 
-		static emit_cloudbridgeready() {
-			var event = new CustomEvent('cloudbridgeready', {
+
+		static emit(name: string) {
+			var event = new CustomEvent(name, {
 				'detail': {
 					'channel': TWebChannel.instance
 				}
 			});
 
-			//event['channel'] = channel;
-			//event['port'] = port;
+			event["channel"] = TWebChannel.instance;
 
 			document.dispatchEvent(event);
 		}

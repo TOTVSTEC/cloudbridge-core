@@ -15,6 +15,9 @@ Class CloudBridgeApp From LongClassname
 	Method OnLoadFinished(url)
 	Method OnStart()
 	Method OnReceivedMessage(content)
+	Method OnPause()
+	Method OnResume()
+
 
 	//Public helper methods
 	Method ExecuteJavaScript(script, callback)
@@ -26,6 +29,8 @@ Method New() Class CloudBridgeApp; Return
 Method OnLoadFinished(url) Class CloudBridgeApp; Return
 Method OnStart() Class CloudBridgeApp; Return
 Method OnReceivedMessage(content) Class CloudBridgeApp; Return
+Method OnPause() Class CloudBridgeApp; Return
+Method OnResume() Class CloudBridgeApp; Return
 
 
 //Public helper methods

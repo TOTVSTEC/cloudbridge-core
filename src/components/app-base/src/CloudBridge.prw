@@ -34,6 +34,14 @@ static Function _CreateComponents(app)
 
 	app:Device := TMobile():New()
 
+	if AttIsMemberOf(app:Device, "bOnPause")
+		app:Device:bOnPause:= {|| _OnPause(app) }
+	EndIf
+
+	if AttIsMemberOf(app:Device, "bOnResume")
+		app:Device:bOnResume:= {|| _OnResume(app) }
+	EndIf
+
     app:WebChannel := TWebChannel():New()
 	app:WebChannel:bJsToAdvpl := {|channel, codeType, codeContent| _ReceivedMessage(app, codeType, codeContent) }
 
@@ -65,7 +73,7 @@ static Function _SaveSetting(section, key, value)
 	WritePProString(section, key, value, ini)
 return
 
-static Function _OnLoadFinished(app, url)
+Static Function _OnLoadFinished(app, url)
 	Local script
 	script:= "TOTVS.TWebChannel.start(" + AllTrim(Str(app:WSPort)) + ");"
 
@@ -73,6 +81,16 @@ static Function _OnLoadFinished(app, url)
 
 	app:OnLoadFinished(url)
 return
+
+Static Function _OnPause(app)
+	app:ExecuteJavaScript("TOTVS.TWebChannel.emit('pause');")
+	app:OnPause()
+Return
+
+Static Function _OnResume(app)
+	app:ExecuteJavaScript("TOTVS.TWebChannel.emit('resume');")
+	app:OnResume()
+Return
 
 static Function _TestServerIp(ip)
 	Local timeout:= 2
