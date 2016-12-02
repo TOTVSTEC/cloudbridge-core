@@ -279,6 +279,8 @@ static Function _ReceivedMessage(app, what, content)
 		result:= _DbCommit(app, value)
 	elseif what == "DBROLLBACK"
 		result:= _DbRollback(app, value)
+	elseif what == "RUNADVPL"
+		result:= _runAdvpl(app, value)
 	else
 		ConOut("[_ReceivedMessage] Mensagem não mapeada! '" + what + "'")
 	endif
@@ -427,6 +429,16 @@ return
 static Function _DbRollback(app, content)
 	return _DbExec("ROLLBACK")
 return
+
+Static Function _runAdvpl(app, content)
+	Local xVal := &("{|| " + content + "}")
+
+	If ValType(xVal) == "B"
+		Return eval(xVal)
+	EndIf
+
+	return Nil
+Return
 
 Static Function _Message(app, value)
 	Return app:OnReceivedMessage(value)
