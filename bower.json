@@ -1,6 +1,6 @@
 {
   "name": "totvs-twebchannel",
-  "version": "v0.0.13-SNAPSHOT",
+  "version": "v0.0.13",
   "description": "A JavaScript TWebChannel for TOTVS Platform",
   "main": "totvs-twebchannel.js",
   "keywords": [
