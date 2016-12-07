@@ -8,6 +8,7 @@ namespace TOTVS {
 		private dialog: QExportedObject;
 		private internalWSPort: number = -1;
 		private __send: Function;
+		private queue: PromiseQueue = new PromiseQueue();
 
 		static instance: TWebChannel = null;
 
@@ -202,17 +203,19 @@ namespace TOTVS {
 		}
 
 		private __send_promise(id: string, content: string, onSuccess: (value: any) => any, onError: (value: any) => any) {
-			var _this = this;
+  			var _this = this;
 
-			var promise = new Promise(function(resolve, reject) {
-				try {
-					_this.dialog.jsToAdvpl(id, _this.__JSON_stringify(content), function(data) {
-						resolve(_this.__JSON_parse(data));
-					});
-				}
-				catch (error) {
-					reject(error);
-				}
+            var promise = this.queue.add(function() {
+                return new Promise(function(resolve, reject) {
+                    try {
+                        _this.dialog.jsToAdvpl(id, _this.__JSON_stringify(content), function (data) {
+                            resolve(_this.__JSON_parse(data));
+                        });
+                    }
+                    catch (error) {
+                        reject(error);
+                    }
+                });
 			});
 
 			if ((onSuccess) && (typeof onSuccess === 'function')) {
@@ -259,7 +262,7 @@ namespace TOTVS {
 				}
 			}
 
-			return data.toString()
+			return JSON.stringify(data);
 		}
 
 		private __JSON_parse(data: any) {

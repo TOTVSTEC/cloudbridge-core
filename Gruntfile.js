@@ -45,7 +45,8 @@ module.exports = function(grunt) {
 					}
 				},
 				files: {
-					'build/stagging/js/<%= twebchannel.name %>.js': ['build/stagging/ts/<%= twebchannel.name %>.js']
+					'build/stagging/js/totvs-twebchannel.js': ['build/stagging/ts/totvs-twebchannel.js'],
+					'build/stagging/js/promisequeue.js': ['build/stagging/ts/promisequeue.js']
 				}
 			}
 		},
@@ -54,7 +55,8 @@ module.exports = function(grunt) {
 			dist: {
 				src: [
 					'src/resources/js/qwebchannel-5.7.0.js',
-					'build/stagging/js/<%= twebchannel.name %>.js'
+					'build/stagging/js/promisequeue.js',
+					'build/stagging/js/totvs-twebchannel.js'
 				],
 				dest: '<%= twebchannel.dist %>/<%= twebchannel.name %>.js'
 			}
