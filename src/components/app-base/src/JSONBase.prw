@@ -9,7 +9,10 @@ Class JSONBase From LongClassName
 EndClass
 
 Method _QuoteString(value) Class JSONBase
-	return '"' + CValToChar(value) + '"'
+	Local result:= CValToChar(value)
+	result:= StrTran(result, '"', '\"')
+
+	return '"' + result + '"'
 Return
 
 Method _Stringify(value) Class JSONBase

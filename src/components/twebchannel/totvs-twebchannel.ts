@@ -256,6 +256,9 @@ namespace TOTVS {
 			if (data === null) {
 				return null;
 			}
+			else if (typeof data === "string") {
+				return data;
+			}
 			else {
 				if ((Array.isArray(data)) || (typeof data === "object")) {
 					return TWebChannel.JSON_FLAG + JSON.stringify(data) + TWebChannel.JSON_FLAG;

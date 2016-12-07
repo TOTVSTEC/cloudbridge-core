@@ -413,21 +413,23 @@ static Function _DbExec(app, query)
 
 	if status < 0
 		result:set("error", TcSqlError())
+		ConOut(query)
+		ConOut(result:Get("error"))
 	endif
 
 	return result
 return
 
 static Function _DbBegin(app, content)
-	return _DbExec("BEGIN")
+	return _DbExec(app, "BEGIN")
 return
 
 static Function _DbCommit(app, content)
-	return _DbExec("COMMIT")
+	return _DbExec(app, "COMMIT")
 return
 
 static Function _DbRollback(app, content)
-	return _DbExec("ROLLBACK")
+	return _DbExec(app, "ROLLBACK")
 return
 
 Static Function _runAdvpl(app, content)
@@ -469,7 +471,6 @@ Static Function JSON_Parse(value)
 
 	Return value
 Return
-
 
 Static Function JSON_Stringify(value)
 	Local valueType:= ValType(value)
