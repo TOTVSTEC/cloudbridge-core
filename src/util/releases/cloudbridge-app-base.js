@@ -3,7 +3,7 @@ let path = require('path'),
 	shelljs = require('shelljs'),
 	Q = require('q'),
 	AppServer = require('totvs-platform-helper/appserver'),
-	TDS = require('totvs-platform-helper/tds'),
+	TDS = require('totvs-platform-helper/tdscli'),
 	GitRepo = require(__basedir + '/src/util/git'),
 	git = null;
 

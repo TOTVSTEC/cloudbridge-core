@@ -5,7 +5,7 @@ global.__basedir = __dirname;
 let path = require('path'),
 	Q = require('q'),
 	AppServer = require('totvs-platform-helper/appserver'),
-	TDS = require('totvs-platform-helper/tds');
+	TDS = require('totvs-platform-helper/tdscli');
 
 const APPSERVER_DIR = path.join(__basedir, 'src', 'resources', 'appserver');
 
