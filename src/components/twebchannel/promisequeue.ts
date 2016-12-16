@@ -40,6 +40,16 @@ namespace TOTVS {
 
 		}
 
+		setMaxPendingPromises(length: number) {
+			let diff: number = (length - this.maxPendingPromises);
+
+			this.maxPendingPromises = length;
+
+			for (; diff > 0; diff--) {
+				this._dequeue();
+			}
+		}
+
 		getPendingLength(): number {
 			return this.pendingPromises;
 		}
