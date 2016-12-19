@@ -8,7 +8,7 @@ namespace TOTVS {
 		private dialog: QExportedObject;
 		private internalWSPort: number = -1;
 		private __send: Function;
-		private queue: PromiseQueue = new PromiseQueue();
+		private queue: PromiseQueue = new PromiseQueue(0);
 
 		static instance: TWebChannel = null;
 
@@ -85,6 +85,8 @@ namespace TOTVS {
 						// Executa callback
 						if (typeof callback === 'function')
 							callback();
+
+						_this.queue.setMaxPendingPromises(1);
 					});
 				}
 			}
