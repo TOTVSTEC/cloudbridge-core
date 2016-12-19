@@ -38,26 +38,39 @@ function compile() {
 	let appserver = new AppServer(APPSERVER_DIR),
 		tds = new TDS(),
 		tdsOptions = {
-			serverType: "Logix",
+			serverType: "4GL",
 			server: "127.0.0.1",
 			port: -1,
 			build: "7.00.150715P",
-			recompile: true,
-			environment: "ENVIRONMENT",
-			program: [
-				path.join(__basedir, 'src', 'components', 'app-base', 'src')
-			],
-			includes: [
-				path.join(__basedir, 'src', 'resources', 'includes'),
-				path.join(__basedir, 'src', 'components', 'app-base', 'includes')
-			]
+			environment: "ENVIRONMENT"
 		};
 
 	return appserver.start()
 		.then(function() {
 			tdsOptions.port = appserver.tcpPort;
+		})
+		.then(function() {
+			var options = Object.assign({
+				recompile: true,
+				program: [
+					path.join(__basedir, 'src', 'components', 'app-base', 'src')
+				],
+				includes: [
+					path.join(__basedir, 'src', 'resources', 'includes'),
+					path.join(__basedir, 'src', 'components', 'app-base', 'includes')
+				]
+			}, tdsOptions);
 
-			return tds.compile(tdsOptions);
+			return tds.compile(options);
+		})
+		.then(function() {
+			var options = Object.assign({
+				fileResource: shelljs.ls(path.join(__basedir, 'src', 'components', 'app-base', 'src')),
+				patchType: "ptm",
+				saveLocal: path.join(__basedir, 'build', 'dist')
+			}, tdsOptions);
+
+			return tds.generatePatch(options);
 		})
 		.then(function() {
 			return appserver.stop();
@@ -93,7 +106,7 @@ function checkout() {
 
 function commit() {
 	let packagePath = path.join(__basedir, 'package.json'),
-		pkg = JSON.parse(fs.readFileSync(packagePath, {encoding: 'utf8'}));
+		pkg = JSON.parse(fs.readFileSync(packagePath, { encoding: 'utf8' }));
 
 	git.bump(pkg.version);
 

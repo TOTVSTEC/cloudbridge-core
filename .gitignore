@@ -5,3 +5,4 @@ build
 .vscode
 .tscache
 **/.baseDir.ts
+src/resources/appserver/tmptds*
