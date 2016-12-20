@@ -15,7 +15,7 @@ Main Function CloudBridge(cloudProg)
 	_Start(app)
 return
 
-static Function GetName(cloudProg)
+Static Function GetName(cloudProg)
 	Local pos:= AT(".CLOUD", Upper(cloudProg))
 
 	if (pos > 0)
@@ -25,7 +25,9 @@ static Function GetName(cloudProg)
 	return cloudProg
 return
 
-static Function _CreateComponents(app)
+Static Function _CreateComponents(app)
+	ErrorBlock({|e| _OnError(app, e) })
+
 	app:Platform:= PlatformInfo():New()
 
 	app:MainWindow := TWindow():New(0, 0, 960, 540, "TOTVS - CloudBridge", NIL, NIL, NIL, NIL, NIL, NIL, NIL, CLR_BLACK, CLR_WHITE, NIL, NIL, NIL, NIL, NIL, NIL, .T. )
@@ -53,6 +55,24 @@ static Function _CreateComponents(app)
     app:WebView:Align := CONTROL_ALIGN_ALLCLIENT
 return
 
+Static Function _OnError(app, error)
+	Local buttonOk
+	Local textError
+	Local stack:= error:ErrorStack
+
+	Private oDlgError
+
+	app:WebView:hide()
+
+	DEFINE MSDIALOG oDlgError TITLE "Error" FROM 000, 000  TO 500, 500 COLORS 0, 16777215 PIXEL
+		@ 000, 000 GET textError VAR stack OF oDlgError MULTILINE SIZE 250, 224 COLORS 0, 16777215 HSCROLL READONLY PIXEL
+		@ 228, 210 BUTTON buttonOk PROMPT "OK" SIZE 037, 020 OF oDlgError ACTION {|| oDlgError:End() } PIXEL
+		textError:Align := CONTROL_ALIGN_TOP
+	ACTIVATE MSDIALOG oDlgError CENTERED
+
+	break(stack)
+Return
+
 Static Function _WindowStarted(app)
 
 	//app:MainWindow:Move(0, 0, 540, 960, .T., .T.)
@@ -60,14 +80,14 @@ Static Function _WindowStarted(app)
 	//app:MainWindow:CommitControls()
 Return
 
-static Function _GetSetting(section, key, defaultValue)
+Static Function _GetSetting(section, key, defaultValue)
 	Default defaultValue := ""
 	static ini:= GetRemoteIniName()
 
 	return GetPvProfString(section, key, defaultValue, ini)
 return
 
-static Function _SaveSetting(section, key, value)
+Static Function _SaveSetting(section, key, value)
 	static ini:= GetRemoteIniName()
 
 	WritePProString(section, key, value, ini)
@@ -92,7 +112,7 @@ Static Function _OnResume(app)
 	app:OnResume()
 Return
 
-static Function _TestServerIp(ip)
+Static Function _TestServerIp(ip)
 	Local timeout:= 2
 	Local status
 
@@ -104,13 +124,13 @@ static Function _TestServerIp(ip)
 	return (status == 200)
 return
 
-static Function _BuildUrl(ip)
+Static Function _BuildUrl(ip)
 	static port:=  AllTrim(Str(GetPort(3)))
 
 	return "http://" + ip + ":" + port + "/"
 return
 
-static Function _FindServerIp(app)
+Static Function _FindServerIp(app)
 	Local serverIP := GetServerIP(.T.)
 	Local i := 0
 
@@ -127,7 +147,7 @@ static Function _FindServerIp(app)
 	return ""
 return
 
-static Function _GetRootPath(app)
+Static Function _GetRootPath(app)
 	Local serverIp
 
 	if (app:Platform:IS_ANDROID)
@@ -158,7 +178,7 @@ static Function _GetRootPath(app)
 	ConOut(app:RootPath)
 return
 
-static Function _InitConfig(app)
+Static Function _InitConfig(app)
 	_GetRootPath(app)
 
 
@@ -166,7 +186,7 @@ static Function _InitConfig(app)
 return
 
 /*
-static Function _ExtractFiles(app)
+Static Function _ExtractFiles(app)
 	Local program:= AllTrim(Lower(GetClassName(app)))
 	//Local outputPath := "\cloudbridge"
 	Local outputPath := GetPvProfString("config", "AndroidPath", "", GetRemoteIniName())
@@ -196,7 +216,7 @@ static Function _ExtractFiles(app)
 	FUnZip(outputPath + ".wpk", outputPath)
 return
 
-static Function _WriteFile(app, outputPath, filename)
+Static Function _WriteFile(app, outputPath, filename)
 	//Local fileHandle
 	Local result
 
@@ -218,7 +238,7 @@ Method _Unpack() Class CloudBridgeApp
 return
 */
 
-static Function _Start(app)
+Static Function _Start(app)
 	ConOut("  WebSocket port: " + AllTrim(Str(app:WSPort)))
 	app:OnStart()
 
@@ -238,7 +258,7 @@ static Function _Start(app)
 	//app:MainWindow:Activate(NIL, NIL, NIL, .T.)
 return
 
-static Function _ReceivedMessage(app, what, content)
+Static Function _ReceivedMessage(app, what, content)
 	Local value:= JSON_Parse(content)
 	Local result:= NIL
 
@@ -288,11 +308,11 @@ static Function _ReceivedMessage(app, what, content)
 	Return JSON_Stringify(result)
  return
 
-static Function _GetPicture(app, content)
+Static Function _GetPicture(app, content)
 	return app:Device:TakePicture()
 return
 
-static Function _BarCodeScan(app, content)
+Static Function _BarCodeScan(app, content)
 	Local ret:= app:Device:BarCode()
 
 	ConOut(ret)
@@ -300,27 +320,27 @@ static Function _BarCodeScan(app, content)
 	return ret
 return
 
-static Function _PairedDevices(app, content)
+Static Function _PairedDevices(app, content)
 	return app:Device:GetPairedBluetoothDevices()
 return
 
-static Function _UnlockOrientation(app, content)
+Static Function _UnlockOrientation(app, content)
 	return app:Device:SetScreenOrientation(-1)
 return
 
-static Function _LockOrientation(app, content)
+Static Function _LockOrientation(app, content)
 	return app:Device:SetScreenOrientation(2)
 return
 
-static Function _GetCurrentPosition(app, content)
+Static Function _GetCurrentPosition(app, content)
 	return app:Device:getGeoCoordinate(1)
 return
 
-static Function _TestDevice(app, content)
+Static Function _TestDevice(app, content)
 	return app:Device:TestDevice(Val(content))
 return
 
-static Function _CreateNotification(app, content)
+Static Function _CreateNotification(app, content)
 	Local id := content:get("id", "")
 	Local title := content:get("title", "")
 	Local message := content:get("message", "")
@@ -405,7 +425,7 @@ Static Function _DbGet(app, query)
 	return result
 return
 
-static Function _DbExec(app, query)
+Static Function _DbExec(app, query)
 	Local result:= JSONObject():New()
 	Local status:= TCSQLExec(query)
 
@@ -420,15 +440,15 @@ static Function _DbExec(app, query)
 	return result
 return
 
-static Function _DbBegin(app, content)
+Static Function _DbBegin(app, content)
 	return _DbExec(app, "BEGIN")
 return
 
-static Function _DbCommit(app, content)
+Static Function _DbCommit(app, content)
 	return _DbExec(app, "COMMIT")
 return
 
-static Function _DbRollback(app, content)
+Static Function _DbRollback(app, content)
 	return _DbExec(app, "ROLLBACK")
 return
 
