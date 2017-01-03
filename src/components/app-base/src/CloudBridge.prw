@@ -315,8 +315,6 @@ return
 Static Function _BarCodeScan(app, content)
 	Local ret:= app:Device:BarCode()
 
-	ConOut(ret)
-
 	return ret
 return
 
