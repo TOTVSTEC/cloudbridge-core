@@ -1,6 +1,6 @@
 {
   "name": "cloudbridge-app-lib",
-  "version": "0.0.15",
+  "version": "0.0.16-SNAPSHOT",
   "description": "The Cloudbridge AdvPL/JavaScript application library",
   "main": "Gruntfile.js",
   "contributors": [
