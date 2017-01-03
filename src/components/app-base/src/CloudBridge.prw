@@ -333,7 +333,19 @@ Static Function _LockOrientation(app, content)
 return
 
 Static Function _GetCurrentPosition(app, content)
-	return app:Device:getGeoCoordinate(1)
+	Local result := JSONObject():New()
+	Local aGeoCoord
+	Local strGeoCoord := app:Device:getGeoCoordinate(0)
+
+	strGeoCoord := StrTran(strGeoCoord, CHR(176))
+	aGeoCoord := STRTOKARR(strGeoCoord, ',')
+	
+	if len(aGeoCoord) = 2
+		result:set("latitude", aGeoCoord[1])
+		result:set("longitude", aGeoCoord[2])
+	endif
+
+	return result
 return
 
 Static Function _TestDevice(app, content)
