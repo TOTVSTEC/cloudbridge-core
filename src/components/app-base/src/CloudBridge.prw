@@ -301,6 +301,8 @@ Static Function _ReceivedMessage(app, what, content)
 		result:= _DbRollback(app, value)
 	elseif what == "RUNADVPL"
 		result:= _runAdvpl(app, value)
+	elseif what == "GETTEMPPATH"
+		result:= _getTempPath(app, value)
 	else
 		ConOut("[_ReceivedMessage] Mensagem não mapeada! '" + what + "'")
 	endif
@@ -313,13 +315,36 @@ Static Function _GetPicture(app, content)
 return
 
 Static Function _BarCodeScan(app, content)
-	Local ret:= app:Device:BarCode()
+	Local result := JSONObject():New()
+	Local aBarcodeRead := app:Device:BarCode()
 
-	return ret
+	if len(aBarcodeRead) = 2
+		result:set("code", aBarcodeRead[1])
+		result:set("format", aBarcodeRead[2])
+	endif
+
+	return result
 return
 
 Static Function _PairedDevices(app, content)
-	return app:Device:GetPairedBluetoothDevices()
+	Local aDevicesResult := app:Device:GetPairedBluetoothDevices()
+	Local result := JSONObject():New()
+	Local aDevices := JSONArray():New()
+	Local rowData
+	Local i
+
+	For i := 1 to len(aDevicesResult)
+		rowData:= JSONObject():New()
+		rowData:Set("name", aDevicesResult[i][1])
+		rowData:Set("address", aDevicesResult[i][2])
+		aDevices:Append(rowData)
+	Next i
+	
+	if len(aDevicesResult) > 0
+		result:set("devices", aDevices)
+	endif
+
+	return result
 return
 
 Static Function _UnlockOrientation(app, content)
@@ -470,6 +495,10 @@ Static Function _runAdvpl(app, content)
 	EndIf
 
 	return Nil
+Return
+
+Static Function _getTempPath(app, content)
+	return app:Device:GetTempPath()
 Return
 
 Static Function _Message(app, value)
