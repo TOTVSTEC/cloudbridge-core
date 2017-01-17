@@ -212,21 +212,21 @@ namespace TOTVS {
                     try {
                         _this.dialog.jsToAdvpl(id, _this.__JSON_stringify(content), function (data) {
                             resolve(_this.__JSON_parse(data));
+
+							if ((onSuccess) && (typeof onSuccess === 'function')) {
+								onSuccess(data);
+							}
                         });
                     }
                     catch (error) {
                         reject(error);
+
+						if ((onError) && (typeof onError === 'function')) {
+							onError(error);
+						}
                     }
                 });
 			});
-
-			if ((onSuccess) && (typeof onSuccess === 'function')) {
-				promise.then(onSuccess);
-			}
-
-			if ((onError) && (typeof onError === 'function')) {
-				promise.catch(onError);
-			}
 
 			return promise;
 		}

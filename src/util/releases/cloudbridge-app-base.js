@@ -10,7 +10,7 @@ let path = require('path'),
 
 const APPSERVER_DIR = path.join(__basedir, 'src', 'resources', 'appserver'),
 	GITHUB_PREFIX = 'https://github.com/TOTVSTEC/',
-	REPO_NAME = 'cloudbridge-app-base';
+	REPO_NAME = 'cloudbridge-core-advpl';
 
 module.exports = function run() {
 	git = new GitRepo({
@@ -28,7 +28,7 @@ module.exports = function run() {
 
 function clean() {
 	let rpoDir = path.join(__basedir, 'build', 'dist'),
-		rpoFile = path.join(rpoDir, 'tttp110.rpo');
+		rpoFile = path.join(rpoDir, 'tttp110.*');
 
 	shelljs.rm('-rf', rpoFile);
 	shelljs.mkdir('-p', rpoDir);
@@ -86,7 +86,6 @@ function copy() {
 	shelljs.mkdir('-p', path.join(dest, '..'));
 	shelljs.cp('-Rf', origin, dest);
 
-
 	origin = path.join(__basedir, 'src', 'resources', 'includes');
 	dest = path.join(home, 'build', 'advpl');
 
@@ -94,7 +93,10 @@ function copy() {
 	shelljs.cp('-Rf', origin, dest);
 
 	origin = path.join(__basedir, 'src', 'components', 'app-base', 'includes');
+	shelljs.cp('-Rf', origin, dest);
 
+	origin = path.join(__basedir, 'build', 'dist', 'tttp110.ptm');
+	dest = path.join(home, 'build', 'advpl', 'tttp110.ptm');
 	shelljs.cp('-Rf', origin, dest);
 }
 

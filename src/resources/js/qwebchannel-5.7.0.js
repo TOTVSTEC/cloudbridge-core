@@ -165,10 +165,12 @@ var QWebChannel = function(transport, initCallback)
         for (var objectName in channel.objects) {
             channel.objects[objectName].unwrapProperties();
         }
+
+        channel.exec({type: QWebChannelMessageTypes.idle});
+
         if (initCallback) {
             initCallback(channel);
         }
-        channel.exec({type: QWebChannelMessageTypes.idle});
     });
 };
 

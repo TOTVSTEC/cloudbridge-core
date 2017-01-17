@@ -1,5 +1,5 @@
 {
-  "name": "cloudbridge-app-lib",
+  "name": "cloudbridge-core",
   "version": "0.0.17-SNAPSHOT",
   "description": "The Cloudbridge AdvPL/JavaScript application library",
   "main": "Gruntfile.js",
@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/totvstec/cloudbridge-app-lib.git"
+    "url": "https://github.com/totvstec/cloudbridge-core.git"
   },
   "license": "MIT",
   "devDependencies": {
