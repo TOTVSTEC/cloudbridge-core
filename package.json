@@ -1,6 +1,6 @@
 {
   "name": "cloudbridge-core",
-  "version": "0.0.17",
+  "version": "0.0.18-SNAPSHOT",
   "description": "The Cloudbridge AdvPL/JavaScript application library",
   "main": "Gruntfile.js",
   "contributors": [
