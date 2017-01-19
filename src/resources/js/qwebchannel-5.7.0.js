@@ -166,11 +166,13 @@ var QWebChannel = function(transport, initCallback)
             channel.objects[objectName].unwrapProperties();
         }
 
+        // TOTVS - verificar as linhas abaixo antes de alterar o arquivo
         channel.exec({type: QWebChannelMessageTypes.idle});
 
         if (initCallback) {
-            initCallback(channel);
+            setTimeout(initCallback.bind(null, channel),0);
         }
+        //END TOTVS
     });
 };
 
