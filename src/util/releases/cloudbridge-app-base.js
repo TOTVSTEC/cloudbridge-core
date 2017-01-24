@@ -1,5 +1,6 @@
 let path = require('path'),
 	fs = require('fs'),
+	os = require('os'),
 	shelljs = require('shelljs'),
 	Q = require('q'),
 	AppServer = require('totvs-platform-helper/appserver'),
@@ -9,6 +10,7 @@ let path = require('path'),
 
 
 const APPSERVER_DIR = path.join(__basedir, 'src', 'resources', 'appserver'),
+	APPSERVER_EXE = os.platform() === 'win32' ? 'appserver.exe' : 'appserver',
 	GITHUB_PREFIX = 'https://github.com/TOTVSTEC/',
 	REPO_NAME = 'cloudbridge-core-advpl';
 
@@ -35,7 +37,9 @@ function clean() {
 }
 
 function compile() {
-	let appserver = new AppServer(APPSERVER_DIR),
+	let appserver = new AppServer({
+		target: path.join(APPSERVER_DIR, APPSERVER_EXE)
+	}),
 		tds = new TDS(),
 		tdsOptions = {
 			serverType: "4GL",

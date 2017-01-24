@@ -3,12 +3,14 @@
 global.__basedir = __dirname;
 
 let path = require('path'),
+	os = require('os'),
 	Q = require('q'),
 	shelljs = require('shelljs'),
 	AppServer = require('totvs-platform-helper/appserver'),
 	TDS = require('totvs-platform-helper/tdscli');
 
-const APPSERVER_DIR = path.join(__basedir, 'src', 'resources', 'appserver');
+const APPSERVER_DIR = path.join(__basedir, 'src', 'resources', 'appserver'),
+	APPSERVER_EXE = os.platform() === 'win32' ? 'appserver.exe' : 'appserver';
 
 module.exports = function(grunt) {
 	var pkg = grunt.file.readJSON('package.json');
@@ -101,7 +103,9 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('compile', 'Compile AdvPL', function(target) {
 		let done = this.async(),
-			appserver = new AppServer(APPSERVER_DIR),
+			appserver = new AppServer({
+				target: path.join(APPSERVER_DIR, APPSERVER_EXE)
+			}),
 			tds = new TDS(),
 			tdsOptions = {
 			serverType: "4GL",
@@ -188,3 +192,4 @@ module.exports = function(grunt) {
 	grunt.registerTask('release', ['clean', 'bump:release', 'dist', 'deploy', 'commit:tag', 'bump:dev', 'commit']);
 
 };
+
