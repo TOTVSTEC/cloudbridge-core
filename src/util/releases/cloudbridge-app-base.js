@@ -52,6 +52,7 @@ function compile() {
 	return appserver.start()
 		.then(function() {
 			tdsOptions.port = appserver.tcpPort;
+			tdsOptions.build = appserver.build;
 		})
 		.then(function() {
 			var options = Object.assign({
