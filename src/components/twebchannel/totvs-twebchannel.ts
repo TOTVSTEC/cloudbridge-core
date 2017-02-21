@@ -92,14 +92,15 @@ namespace TOTVS {
 			}
 		}
 
-		static getChannel() {
-
-		}
-
 		static start(port: number) {
 			if (TWebChannel.instance === null) {
 				var channel = new TWebChannel(port, function() {
 					TWebChannel.instance = channel;
+
+					if (window) {
+						window['cloudbridge'] = channel;
+					}
+
 					TWebChannel.emit('cloudbridgeready');
 				});
 			}
