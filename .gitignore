@@ -6,3 +6,4 @@ build
 .tscache
 **/.baseDir.ts
 src/resources/appserver/tmptds*
+debug.log
