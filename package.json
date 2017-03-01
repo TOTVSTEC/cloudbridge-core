@@ -2,6 +2,7 @@
   "name": "cloudbridge-core",
   "version": "0.0.19-SNAPSHOT",
   "description": "The Cloudbridge AdvPL/JavaScript application library",
+  "license": "MIT",
   "main": "Gruntfile.js",
   "contributors": [
     {
@@ -15,22 +16,23 @@
   },
   "scripts": {
     "build": "grunt",
+    "clean": "grunt clean",
     "release": "grunt release"
   },
-  "license": "MIT",
   "devDependencies": {
     "grunt": "^1.0.1",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-uglify": "^2.2.0",
     "grunt-template": "^1.0.0",
     "grunt-ts": "^5.5.1",
     "load-grunt-tasks": "^3.5.2",
     "q": "^1.4.1",
     "semver": "^5.3.0",
-    "shelljs": "^0.7.4",
-    "time-grunt": "^1.2.1",
-    "totvs-platform-helper": "^1.0.0",
-    "typescript": "^2.1.4"
+    "shelljs": "^0.7.6",
+    "time-grunt": "^1.4.0",
+    "totvs-platform-helper": "^1.0.1",
+    "totvstec-tools": "^1.0.5",
+    "typescript": "^2.2.1"
   }
 }
