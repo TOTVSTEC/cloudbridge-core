@@ -33,6 +33,6 @@
     "time-grunt": "^1.4.0",
     "totvs-platform-helper": "^1.0.1",
     "totvstec-tools": "^1.0.5",
-    "typescript": "^2.2.1"
+    "typescript": "^2.1.6"
   }
 }
