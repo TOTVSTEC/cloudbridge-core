@@ -1,7 +1,8 @@
-declare class Promise {
+declare class Promise<T> {
 	constructor(executor: Function);
-	then: Function;
-	catch: Function;
+
+	then: Promise<T>;
+	catch: Promise<T>;
 }
 
 declare class QWebChannel {
