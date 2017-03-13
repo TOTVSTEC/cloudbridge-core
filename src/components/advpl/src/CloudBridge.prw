@@ -152,6 +152,11 @@ Static Function _GetRootPath(app)
 
 	if (app:Platform:IS_ANDROID)
 		app:RootPath:= "file:///android_asset/web/"
+	elseif (app:Platform:IS_IOS)
+		conout("IOS")
+		Conout(GetSrvIniName())
+		app:RootPath:= GetPvProfString("ENVIRONMENT", "ASSETSPATH", "Erro", GetSrvIniName()) + "/web/"
+		conout(app:RootPath)
 	else
 		serverIp:= _GetSetting("CloudBridge", "ServerAddress")
 
