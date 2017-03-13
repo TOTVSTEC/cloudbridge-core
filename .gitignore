@@ -2,7 +2,8 @@ node_modules
 bower_components
 build
 .tmp
-.vscode
+.vscode/.BROWSE.VC.DB
+.vscode/launch.json
 .tscache
 **/.baseDir.ts
 src/resources/appserver/tmptds*

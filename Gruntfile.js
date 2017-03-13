@@ -35,7 +35,8 @@ module.exports = function(grunt) {
 				tsconfig: true,
 				options: {
 					sourceMap: true,
-					declaration: true
+					declaration: true,
+					compiler: './node_modules/typescript/bin/tsc'
 				}
 			}
 		},
