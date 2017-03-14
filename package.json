@@ -32,7 +32,7 @@
     "shelljs": "^0.7.6",
     "time-grunt": "^1.4.0",
     "totvs-platform-helper": "^1.0.1",
-    "totvstec-tools": "^1.0.5",
+    "totvstec-tools": "^1.0.6",
     "typescript": "^2.1.6"
   }
 }
