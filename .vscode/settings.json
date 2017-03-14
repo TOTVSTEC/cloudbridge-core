@@ -1,6 +1,6 @@
 {
-    "javascript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
-    "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
-    "editor.formatOnSave": true,
-    "typescript.tsdk": "./node_modules/typescript/lib"
+  "javascript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+  "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+  "editor.formatOnSave": true,
+  "typescript.tsdk": "./node_modules/typescript/lib"
 }
