@@ -17,7 +17,7 @@ Class PlatformInfo
 	Data ANDROID_VALUE
 	Data IOS_VALUE
 	Data WINDOWS_UNIVERSAL_VALUE
-	
+
 	Data Value
 
 	Method New() Constructor
@@ -45,7 +45,7 @@ Method New() Class PlatformInfo
 	SELF:IOS_VALUE				:= 5
 	SELF:WINDOWS_UNIVERSAL_VALUE:= 6
 
-    if ("ANDROID" $ stringOS)
+    if (("ANDROID" $ stringOS) .OR. ("Android" $ stringOS))
 		SELF:IS_ANDROID := .T.
 		SELF:IS_MOBILE	:= .T.
 
