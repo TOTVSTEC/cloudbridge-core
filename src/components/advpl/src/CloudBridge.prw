@@ -4,11 +4,15 @@ Main Function CloudBridge(cloudProg)
 	Local name := GetName(cloudProg)
 	Local initializer := &("{|| " + name + "():New() }")
 
+	//PtInternal(21, "CP1252")
+
 	Private app := nil
 
 	if valType(initializer) == "B"
 		app:= eval(initializer)
 	endif
+
+	app:Name:= name
 
 	_CreateComponents(app)
 	_InitConfig(app)
@@ -36,6 +40,8 @@ Static Function _CreateComponents(app)
 
 	app:Device := TMobile():New()
 
+	app:Device:bNotificationTapped:= {|id| _OnNotfTapped(app, id) }
+
 	if AttIsMemberOf(app:Device, "bOnPause")
 		app:Device:bOnPause:= {|| _OnPause(app) }
 	EndIf
@@ -44,15 +50,15 @@ Static Function _CreateComponents(app)
 		app:Device:bOnResume:= {|| _OnResume(app) }
 	EndIf
 
-    app:WebChannel := TWebChannel():New()
+	app:WebChannel := TWebChannel():New()
 	app:WebChannel:bJsToAdvpl := {|channel, codeType, codeContent| _ReceivedMessage(app, codeType, codeContent) }
 
-    app:WSPort:= app:WebChannel:connect()
+	app:WSPort:= app:WebChannel:connect()
 
-    app:WebView := TWebEngine():New(app:MainWindow, 0, 0, 100, 100,, app:WSPort)
-    app:WebView:bLoadFinished := {|webview, url| _OnLoadFinished(app, url) }
-    app:WebView:setAsMain() // Define como WebEngine que recebera o KEY_BACK (Android)
-    app:WebView:Align := CONTROL_ALIGN_ALLCLIENT
+	app:WebView := TWebEngine():New(app:MainWindow, 0, 0, 100, 100,, app:WSPort)
+	app:WebView:bLoadFinished := {|webview, url| _OnLoadFinished(app, url) }
+	app:WebView:setAsMain() // Define como WebEngine que recebera o KEY_BACK (Android)
+	app:WebView:Align := CONTROL_ALIGN_ALLCLIENT
 return
 
 Static Function _OnError(app, error)
@@ -95,12 +101,22 @@ return
 
 Static Function _OnLoadFinished(app, url)
 	Local script
-	script:= "TOTVS.TWebChannel.start(" + AllTrim(Str(app:WSPort)) + ");"
+	Local channel:= "TWebChannel"
+
+	if (GetRemoteType() == REMOTE_HTML)
+		channel:= "TMessageChannel"
+	endif
+
+	script:= "TOTVS." + channel + ".start(" + AllTrim(Str(app:WSPort)) + ");"
 
 	app:ExecuteJavaScript(script)
 
 	app:OnLoadFinished(url)
 return
+
+Static Function _OnNotfTapped(app, id)
+	app:OnNotificationTapped(id)
+Return
 
 Static Function _OnPause(app)
 	app:ExecuteJavaScript("TOTVS.TWebChannel.emit('pause');")
@@ -118,8 +134,13 @@ Static Function _TestServerIp(ip)
 
 	url:= _BuildUrl(ip)
 
-	HttpCGet(url + "time.apl", NIL, timeout)
-	status:= HTTPGetStatus(NIL)
+	if (GetRemoteType() == REMOTE_HTML)
+		HttpCGet(url + "time.apl", NIL, timeout)
+		status:= HTTPGetStatus(NIL, .T.)
+	Else
+		HttpCGet(url + "time.apl", NIL, timeout)
+		status:= HTTPGetStatus(NIL, .F.)
+	Endif
 
 	return (status == 200)
 return
@@ -150,12 +171,27 @@ return
 Static Function _GetRootPath(app)
 	Local serverIp
 
+	app:RootPath:= ""
+
+	//if (app:Platform:IS_WEBAPP)
+	if (GetRemoteType() == REMOTE_HTML)
+		//app:RootPath:= "http://localhost:"
+		//app:RootPath+= GetPvProfString("WEBAPP", "PORT", "8080", GetSrvIniName())
+		//app:RootPath+= "/"
+		app:RootPath+= Lower(app:Name)
+		app:RootPath+= "/"
+
+		return
+	endif
+
 	if (app:Platform:IS_ANDROID)
 		app:RootPath:= "file:///android_asset/web/"
 	elseif (app:Platform:IS_IOS)
 		conout("IOS")
 		Conout(GetSrvIniName())
+
 		app:RootPath:= GetPvProfString("ENVIRONMENT", "ASSETSPATH", "Erro", GetSrvIniName()) + "/web/"
+
 		conout(app:RootPath)
 	else
 		serverIp:= _GetSetting("CloudBridge", "ServerAddress")
@@ -185,7 +221,7 @@ return
 
 Static Function _InitConfig(app)
 	_GetRootPath(app)
-
+	_CopyDir("\")
 
 	//_ExtractFiles(app)
 return
@@ -195,7 +231,6 @@ Static Function _ExtractFiles(app)
 	Local program:= AllTrim(Lower(GetClassName(app)))
 	//Local outputPath := "\cloudbridge"
 	Local outputPath := GetPvProfString("config", "AndroidPath", "", GetRemoteIniName())
-
 
 	//if (OutputPath == "")
 	//	OutputPath := GetPvProfString("http", "Path", "", GetSrvIniName())
@@ -229,11 +264,11 @@ Static Function _WriteFile(app, outputPath, filename)
 
 	//fileHandle := FCreate(OutputPath + "\" + fileName)
 	//FWrite(fileHandle, getApoRes(fileName))
-    //FClose(fileHandle)
+	//FClose(fileHandle)
 
-    result:= Resource2File(filename, OutputPath + "\" + fileName)
+	result:= Resource2File(filename, OutputPath + "\" + fileName)
 
-    //Varinfo("result", result)
+	//Varinfo("result", result)
 return
 */
 
@@ -243,11 +278,46 @@ Method _Unpack() Class CloudBridgeApp
 return
 */
 
+
+Static Function _CopyDir(cPath, toPath)
+	Local aFiles := Directory(cPath+'*.*')
+	Local aSubDir := Directory(cPath+'*.*', 'HSD')
+	Local nI
+	Local isFile
+	Local isDot
+
+	ConOut("CopyDir: " + cPath)
+	ConOut("Files: ")
+
+	// Acumula o tamanho dos arquivos desta pasta
+	//For nI := 1 to len(aFiles)
+		//VarInfo("aFiles", aFiles)
+	//Next
+
+	ConOut("Directories: ")
+	// Acumula o tamanho das pastas a partir desta, caso existam
+	// Ignora os diretorios "." ( atual ) e ".." ( anterior )
+
+	//For nI := 1 to len(aSubDir)
+		//VarInfo("aSubDir", aSubDir)
+	//Next
+	/*
+	For nI := 1 to len(aSubDir)
+		isFile:= File(aSubDir[1])
+		isDot:= aSubDir[nI][1] == "." .OR. aSubDir[nI][1] == ".."
+
+		If (!isFile .AND. !isDot)
+			_CopyDir( cPath + aSubDir[nI][1] + '\' )
+		Endif
+	Next
+	*/
+Return
+
 Static Function _Start(app)
 	ConOut("  WebSocket port: " + AllTrim(Str(app:WSPort)))
 	app:OnStart()
 
-/*
+	/*
 	//if (app:Platform:IS_DESKTOP)
 	if (app:Platform:IS_MOBILE)
 		//app:MainWindow:nHeight	:= 10 //960
@@ -258,7 +328,8 @@ Static Function _Start(app)
 	else
 		app:MainWindow:lMaximized:= .T.
 	endif
-*/
+	*/
+
 	app:MainWindow:Activate("MAXIMIZED")
 	//app:MainWindow:Activate(NIL, NIL, NIL, .T.)
 return
@@ -313,7 +384,7 @@ Static Function _ReceivedMessage(app, what, content)
 	endif
 
 	Return JSON_Stringify(result)
- return
+return
 
 Static Function _GetPicture(app, content)
 	return app:Device:TakePicture()
@@ -344,7 +415,7 @@ Static Function _PairedDevices(app, content)
 		rowData:Set("address", aDevicesResult[i][2])
 		aDevices:Append(rowData)
 	Next i
-	
+
 	if len(aDevicesResult) > 0
 		result:set("devices", aDevices)
 	endif
@@ -367,7 +438,7 @@ Static Function _GetCurrentPosition(app, content)
 
 	strGeoCoord := StrTran(strGeoCoord, CHR(176))
 	aGeoCoord := STRTOKARR(strGeoCoord, ',')
-	
+
 	if len(aGeoCoord) = 2
 		result:set("latitude", aGeoCoord[1])
 		result:set("longitude", aGeoCoord[2])
@@ -545,12 +616,12 @@ Static Function JSON_Stringify(value)
 	ElseIf (valueType == 'O')
 		className:= Upper(GetClassName(value))
 
- 		if (className == "THASHMAP")
- 			Return JSON_Stringify(JSONObject():New(value))
- 		ElseIf(className == "JSONOBJECT") .OR. (className == "JSONARRAY")
- 			Return JSON_FLAG + value:ToString() + JSON_FLAG
- 		EndIf
- 	EndIf
+		if (className == "THASHMAP")
+			Return JSON_Stringify(JSONObject():New(value))
+		ElseIf(className == "JSONOBJECT") .OR. (className == "JSONARRAY")
+			Return JSON_FLAG + value:ToString() + JSON_FLAG
+		EndIf
+	EndIf
 
 	Return value
 Return
