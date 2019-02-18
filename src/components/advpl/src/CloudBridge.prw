@@ -10,6 +10,8 @@ Main Function CloudBridge(cloudProg)
 		app:= eval(initializer)
 	endif
 
+	app:Name:= name
+
 	_CreateComponents(app)
 	_InitConfig(app)
 	_Start(app)
@@ -35,6 +37,8 @@ Static Function _CreateComponents(app)
 	app:MainWindow:bStart:= {|| _WindowStarted(app) }
 
 	app:Device := TMobile():New()
+
+	app:Device:bNotificationTapped:= {|id| _OnNotfTapped(app, id) }
 
 	if AttIsMemberOf(app:Device, "bOnPause")
 		app:Device:bOnPause:= {|| _OnPause(app) }
@@ -95,12 +99,22 @@ return
 
 Static Function _OnLoadFinished(app, url)
 	Local script
-	script:= "TOTVS.TWebChannel.start(" + AllTrim(Str(app:WSPort)) + ");"
+	Local channel:= "TWebChannel"
+
+	if (GetRemoteType() == REMOTE_HTML)
+		channel:= "TMessageChannel"
+	endif
+
+	script:= "TOTVS." + channel + ".start(" + AllTrim(Str(app:WSPort)) + ");"
 
 	app:ExecuteJavaScript(script)
 
 	app:OnLoadFinished(url)
 return
+
+Static Function _OnNotfTapped(app, id)
+	app:OnNotificationTapped(id)
+Return
 
 Static Function _OnPause(app)
 	app:ExecuteJavaScript("TOTVS.TWebChannel.emit('pause');")
@@ -118,8 +132,13 @@ Static Function _TestServerIp(ip)
 
 	url:= _BuildUrl(ip)
 
-	HttpCGet(url + "time.apl", NIL, timeout)
-	status:= HTTPGetStatus(NIL)
+	if (GetRemoteType() == REMOTE_HTML)
+		HttpCGet(url + "time.apl", NIL, timeout)
+		status:= HTTPGetStatus(NIL, .T.)
+	Else
+		HttpCGet(url + "time.apl", NIL, timeout)
+		status:= HTTPGetStatus(NIL, .F.)
+	Endif
 
 	return (status == 200)
 return
@@ -150,12 +169,27 @@ return
 Static Function _GetRootPath(app)
 	Local serverIp
 
+	app:RootPath:= ""
+
+	//if (app:Platform:IS_WEBAPP)
+	if (GetRemoteType() == REMOTE_HTML)
+		//app:RootPath:= "http://localhost:"
+		//app:RootPath+= GetPvProfString("WEBAPP", "PORT", "8080", GetSrvIniName())
+		//app:RootPath+= "/"
+		app:RootPath+= Lower(app:Name)
+		app:RootPath+= "/"
+
+		return
+	endif
+
 	if (app:Platform:IS_ANDROID)
 		app:RootPath:= "file:///android_asset/web/"
 	elseif (app:Platform:IS_IOS)
 		conout("IOS")
 		Conout(GetSrvIniName())
+
 		app:RootPath:= GetPvProfString("ENVIRONMENT", "ASSETSPATH", "Erro", GetSrvIniName()) + "/web/"
+
 		conout(app:RootPath)
 	else
 		serverIp:= _GetSetting("CloudBridge", "ServerAddress")
@@ -185,7 +219,7 @@ return
 
 Static Function _InitConfig(app)
 	_GetRootPath(app)
-
+	_CopyDir("\")
 
 	//_ExtractFiles(app)
 return
@@ -195,7 +229,6 @@ Static Function _ExtractFiles(app)
 	Local program:= AllTrim(Lower(GetClassName(app)))
 	//Local outputPath := "\cloudbridge"
 	Local outputPath := GetPvProfString("config", "AndroidPath", "", GetRemoteIniName())
-
 
 	//if (OutputPath == "")
 	//	OutputPath := GetPvProfString("http", "Path", "", GetSrvIniName())
@@ -243,11 +276,46 @@ Method _Unpack() Class CloudBridgeApp
 return
 */
 
+
+Static Function _CopyDir(cPath, toPath)
+	Local aFiles := Directory(cPath+'*.*')
+	Local aSubDir := Directory(cPath+'*.*', 'HSD')
+	Local nI
+	Local isFile
+	Local isDot
+
+	ConOut("CopyDir: " + cPath)
+	ConOut("Files: ")
+
+	// Acumula o tamanho dos arquivos desta pasta
+	//For nI := 1 to len(aFiles)
+		//VarInfo("aFiles", aFiles)
+	//Next
+
+	ConOut("Directories: ")
+	// Acumula o tamanho das pastas a partir desta, caso existam
+	// Ignora os diretorios "." ( atual ) e ".." ( anterior )
+
+	//For nI := 1 to len(aSubDir)
+		//VarInfo("aSubDir", aSubDir)
+	//Next
+	/*
+	For nI := 1 to len(aSubDir)
+		isFile:= File(aSubDir[1])
+		isDot:= aSubDir[nI][1] == "." .OR. aSubDir[nI][1] == ".."
+
+		If (!isFile .AND. !isDot)
+			_CopyDir( cPath + aSubDir[nI][1] + '\' )
+		Endif
+	Next
+	*/
+Return
+
 Static Function _Start(app)
 	ConOut("  WebSocket port: " + AllTrim(Str(app:WSPort)))
 	app:OnStart()
 
-/*
+	/*
 	//if (app:Platform:IS_DESKTOP)
 	if (app:Platform:IS_MOBILE)
 		//app:MainWindow:nHeight	:= 10 //960
@@ -258,7 +326,8 @@ Static Function _Start(app)
 	else
 		app:MainWindow:lMaximized:= .T.
 	endif
-*/
+	*/
+
 	app:MainWindow:Activate("MAXIMIZED")
 	//app:MainWindow:Activate(NIL, NIL, NIL, .T.)
 return
@@ -320,7 +389,7 @@ Static Function _GetPicture(app, content)
 return
 
 Static Function _BarCodeScan(app, content)
-	Local result := JSONObject():New()
+	Local result := _JSONObject():New()
 	Local aBarcodeRead := app:Device:BarCode()
 
 	if len(aBarcodeRead) = 2
@@ -333,13 +402,13 @@ return
 
 Static Function _PairedDevices(app, content)
 	Local aDevicesResult := app:Device:GetPairedBluetoothDevices()
-	Local result := JSONObject():New()
-	Local aDevices := JSONArray():New()
+	Local result := _JSONObject():New()
+	Local aDevices := _JSONArray():New()
 	Local rowData
 	Local i
 
 	For i := 1 to len(aDevicesResult)
-		rowData:= JSONObject():New()
+		rowData:= _JSONObject():New()
 		rowData:Set("name", aDevicesResult[i][1])
 		rowData:Set("address", aDevicesResult[i][2])
 		aDevices:Append(rowData)
@@ -361,7 +430,7 @@ Static Function _LockOrientation(app, content)
 return
 
 Static Function _GetCurrentPosition(app, content)
-	Local result := JSONObject():New()
+	Local result := _JSONObject():New()
 	Local aGeoCoord
 	Local strGeoCoord := app:Device:getGeoCoordinate(0)
 
@@ -397,7 +466,7 @@ Static Function _OpenSettings(app, content)
 Return
 
 Static Function _DbExecScalar(app, query)
-	Local result := JSONObject():New()
+	Local result := _JSONObject():New()
 	Local status
 
 	ConOut("_DbExecScalar: " + query)
@@ -423,7 +492,7 @@ Static Function _DbExecScalar(app, query)
 Return
 
 Static Function _DbGet(app, query)
-	Local result := JSONObject():New()
+	Local result := _JSONObject():New()
 	Local i
 	Local status
 	Local queryData
@@ -437,7 +506,7 @@ Static Function _DbGet(app, query)
 	if status < 0
 		result:set("error", TcSqlError())
 	else
-		queryData:= JSONArray():New()
+		queryData:= _JSONArray():New()
 
 		// Recupera os dados
 		dbUseArea(.T., 'TOPCONN', TCGenQry(,,query),'TRB', .F., .T.)
@@ -446,7 +515,7 @@ Static Function _DbGet(app, query)
 		nRecords := TRB->(RecCount())
 
 		while !TRB->(eof())
-			rowData:= JSONObject():New()
+			rowData:= _JSONObject():New()
 
 			for i :=  1 to nFields
 				rowData:Set(FieldName(i), FieldGet(i))
@@ -466,7 +535,7 @@ Static Function _DbGet(app, query)
 return
 
 Static Function _DbExec(app, query)
-	Local result:= JSONObject():New()
+	Local result:= _JSONObject():New()
 	Local status:= TCSQLExec(query)
 
 	result:set("result", status)
@@ -525,9 +594,9 @@ Static Function JSON_Parse(value)
 				value:= SubStr(value, flagLength + 1, valueLength)
 
 				If ((Left(value, 1) == '{') .AND. (Right(value, 1) == '}'))
-					return JSONObject():New(value)
+					return _JSONObject():New(value)
 				ElseIf ((Left(value, 1) == '[') .AND. (Right(value, 1) == ']'))
-					return JSONArray():New(value)
+					return _JSONArray():New(value)
 				EndIf
 			EndIf
 		EndIf
@@ -541,13 +610,13 @@ Static Function JSON_Stringify(value)
 	Local className
 
 	If (valueType == 'A')
-		Return JSON_Stringify(JSONArray():New(value))
+		Return JSON_Stringify(_JSONArray():New(value))
 	ElseIf (valueType == 'O')
 		className:= Upper(GetClassName(value))
 
  		if (className == "THASHMAP")
- 			Return JSON_Stringify(JSONObject():New(value))
- 		ElseIf(className == "JSONOBJECT") .OR. (className == "JSONARRAY")
+			Return JSON_Stringify(_JSONObject():New(value))
+		ElseIf(className == "_JSONOBJECT") .OR. (className == "_JSONARRAY")
  			Return JSON_FLAG + value:ToString() + JSON_FLAG
  		EndIf
  	EndIf

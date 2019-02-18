@@ -3,7 +3,7 @@
 #define HASH_KEY	1
 #define HASH_VALUE	2
 
-Class JSONObject From JSONBase
+Class _JSONObject From JSONBase
 	Data oHash
 
 	Method New() Constructor
@@ -20,7 +20,7 @@ Class JSONObject From JSONBase
 	Method ToString()
 End Class
 
-Method New(jsonString) Class JSONObject
+Method New(jsonString) Class _JSONObject
 	Local oParser := TJsonParser():New()
 	Local jsonfields := {}
 	Local nRetParser := 0
@@ -46,7 +46,7 @@ Method New(jsonString) Class JSONObject
 	//ConOut("nRetParser", nRetParser)
 Return
 
-Method Get(key, defaultValue) Class JSONObject
+Method Get(key, defaultValue) Class _JSONObject
 	Local xGet := Nil
 	Default defaultValue:= NIL
 
@@ -58,14 +58,14 @@ Method Get(key, defaultValue) Class JSONObject
 	Endif
 Return
 
-Method Has(key) Class JSONObject
+Method Has(key) Class _JSONObject
 	Local dummy
 
 	Return Self:oHash:Get(key, dummy)
 Return
 
 
-Method Keys() Class JSONObject
+Method Keys() Class _JSONObject
 	Local list
 	Local result:= {}
 
@@ -77,17 +77,17 @@ Method Keys() Class JSONObject
 Return
 
 
-Method Remove(key) Class JSONObject
+Method Remove(key) Class _JSONObject
 	Return Self:oHash:Del(key)
 Return
 
-Method Set(key, value) Class JSONObject
+Method Set(key, value) Class _JSONObject
 	If !Self:oHash:Set(key, SELF:_Upgrade(value))
 	    ConOut("Falha ao inserir chave '" + cKey + "'")
 	EndIf
 Return
 
-Method ToString() Class JSONObject
+Method ToString() Class _JSONObject
 	Local i := 0
 	Local size
 	Local list := {}

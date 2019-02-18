@@ -27,17 +27,17 @@ Method _Stringify(value) Class JSONBase
 		return 'null'
 	elseif cType == 'O'
 		cType:= Upper(GetClassName(value))
-		if ((cType == "JSONOBJECT") .OR. (cType == "JSONARRAY"))
+		if ((cType == "_JSONOBJECT") .OR. (cType == "_JSONARRAY"))
 			Return value:ToString()
 		elseIf (cType == "THASHMAP")
-			temp:= JSONObject():New(value)
+			temp:= _JSONObject():New(value)
 
 			Return temp:ToString()
 		EndIf
 
 		Return Nil
 	elseif cType == 'A'
-		temp:= JSONArray():New(value)
+		temp:= _JSONArray():New(value)
 
 		Return temp:ToString()
 	else
@@ -66,9 +66,9 @@ Method _Upgrade(value) Class JSONBase
 	Local cType:= ValType(value)
 
 	if (cType == 'A')
-		Return JSONArray():New(value)
+		Return _JSONArray():New(value)
 	elseif ((cType == 'O') .AND. (Upper(GetClassName(value)) == "THASHMAP"))
-		Return JSONObject():New(value)
+		Return _JSONObject():New(value)
 	else
 		Return value
 	EndIf

@@ -1,6 +1,6 @@
 #include "TOTVS.CH"
 
-Class JSONArray From JSONBase
+Class _JSONArray From JSONBase
 	Data oArray
 
 	Method New() Constructor
@@ -15,7 +15,7 @@ Class JSONArray From JSONBase
 
 End Class
 
-Method New(jsonString) Class JSONArray
+Method New(jsonString) Class _JSONArray
 	Local oParser := TJsonParser():New()
 	Local jsonfields := {}
 	Local nRetParser := 0
@@ -37,11 +37,11 @@ Method New(jsonString) Class JSONArray
 	Endif
 Return
 
-Method Length() Class JSONArray
+Method Length() Class _JSONArray
 	Return Len(SELF:oArray)
 Return
 
-Method Get(index) Class JSONArray
+Method Get(index) Class _JSONArray
 	if index > 0 .AND. index <= SELF:Length()
 		Return SELF:oArray[index]
 	EndIf
@@ -49,11 +49,11 @@ Method Get(index) Class JSONArray
 	Return NIL
 Return
 
-Method Append(value) Class JSONArray
+Method Append(value) Class _JSONArray
 	AAdd(SELF:oArray, SELF:_Upgrade(value))
 Return
 
-Method Insert(index, value) Class JSONArray
+Method Insert(index, value) Class _JSONArray
 	Local length:= SELF:Length()
 	
 	if index < 1
@@ -76,7 +76,7 @@ Method Insert(index, value) Class JSONArray
 	SELF:oArray[index] := SELF:_Upgrade(value)
 Return
 
-Method ToString() Class JSONArray
+Method ToString() Class _JSONArray
 	Local result:= {}
 	Local size:= Len(SELF:oArray)
 	Local value

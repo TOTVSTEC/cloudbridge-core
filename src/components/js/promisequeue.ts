@@ -5,7 +5,7 @@ namespace TOTVS {
 		private pendingPromises: number;
 		private maxPendingPromises: number;
 		private maxQueuedPromises: number;
-		private queue: Array<any>;
+		public queue: Array<any>;
 
 		constructor(maxPendingPromises?: number, maxQueuedPromises?: number) {
 			this.pendingPromises = 0;
@@ -48,6 +48,10 @@ namespace TOTVS {
 			for (; diff > 0; diff--) {
 				this._dequeue();
 			}
+		}
+
+		get(index): Promise<any> {
+			return this.queue[index];
 		}
 
 		getPendingLength(): number {

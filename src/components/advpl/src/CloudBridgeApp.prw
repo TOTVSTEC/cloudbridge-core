@@ -70,6 +70,15 @@ Class CloudBridgeApp From LongClassName
 	*/
 	Data Platform
 
+	/**
+	@advpl_attribute Name
+
+	@advpl_desc Nome do aplicativo
+
+	@advpl_type C
+	*/
+	Data Name
+
 	Method New() Constructor
 
 	//User can override this methods
@@ -78,6 +87,7 @@ Class CloudBridgeApp From LongClassName
 	Method OnReceivedMessage(content)
 	Method OnPause()
 	Method OnResume()
+	Method OnNotificationTapped(index)
 
 
 	//Public helper methods
@@ -114,7 +124,7 @@ Method OnStart() Class CloudBridgeApp; Return
 
 @advpl_desc Callback chamado via channel.sendMessage em JavaScript, para implementacao de ações customizadas
 
-@advpl_param content    XO  Valor enviado como parametro de channel.sendMessage. Pode ser Caracter, Numerico, Lógico, ou instancia das classes JSONArray e JSONObject 
+@advpl_param content    XO  Valor enviado como parametro de channel.sendMessage. Pode ser Caracter, Numerico, Lógico, ou instancia das classes _JSONArray e _JSONObject
 */
 Method OnReceivedMessage(content) Class CloudBridgeApp; Return
 
@@ -133,6 +143,16 @@ Method OnPause() Class CloudBridgeApp; Return
 Method OnResume() Class CloudBridgeApp; Return
 
 
+/**
+@advpl_method OnNotificationTapped
+
+@advpl_desc Callback chamado quando uma notificacao for clicada
+
+@advpl_param index    NO  Id utilizado na criacao da notificao
+*/
+Method OnNotificationTapped(index) Class CloudBridgeApp; Return
+
+
 //Public helper methods
 /**
 @advpl_method ExecuteJavaScript
@@ -142,4 +162,3 @@ Method OnResume() Class CloudBridgeApp; Return
 Method ExecuteJavaScript(script) Class CloudBridgeApp
 	SELF:WebView:runJavaScript(script)
 Return
-
